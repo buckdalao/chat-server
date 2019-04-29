@@ -1,0 +1,15 @@
+<?php
+
+namespace RepositoryNamespace;
+
+use App\Models\ModelName;
+use App\Repositories\EloquentRepository;
+
+class DummyClass  extends EloquentRepository
+{
+
+    public function __construct(ModelName $model)
+    {
+        parent::__construct($model);
+    }
+}
