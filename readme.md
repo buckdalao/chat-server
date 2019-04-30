@@ -25,6 +25,13 @@ Workerman|3.5
  
  ```
  composer install
+ 
+ cp .env.example .env
+ 
+ php artisan key:generate
+ 
+ php artisan jwt:secret
+
  ```
  
  * 启动workerman服务
