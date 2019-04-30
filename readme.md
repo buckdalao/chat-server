@@ -1,13 +1,13 @@
-##项目简介
+## 项目简介
  * 使用Laravel框架结合Workerman搭建的简易消息服务
  
- package|version 
- ---|---
- PHP|>7.1.3
- Laravel|5.7
- Workerman|3.5
+package|version 
+---|---
+PHP|>7.1.3
+Laravel|5.7
+Workerman|3.5
  
- ##使用说明
+## 使用说明
  * workerman 相关配置
  ```
  REGISTER_SERVER=0.0.0.0:1239
