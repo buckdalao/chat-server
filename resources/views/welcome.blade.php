@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+        <title>Chat Server</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
@@ -81,76 +81,9 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Docs</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://blog.laravel.com">Blog</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
+                    Chat Server
                 </div>
             </div>
-                <input type="text" id="token"><button onclick="connect()">连接</button><br>
-                <input type="text" id="msg"><button onclick="sendMsg()">发送</button>
         </div>
     </body>
 </html>
-<script>
-    var socket;
-    var token;
-    var timer;
-    function connect(){
-        token = "bearer " + document.getElementById('token').value
-        socket = new WebSocket('ws://reconsitutionfs.com:9526')
-        socket.onopen = onopensocket
-        socket.onmessage = onmessage
-        socket.onerror = socketError
-        socket.onclose = socketClose
-        timer = setInterval(function(){
-            socket.send('{"type":"ping"}')
-        },1000*25)
-    }
-    function onopensocket () {
-        var send = '{"type":"login","uid":"4","token":"'+ token +'"}'
-        console.log('连接服务器成功')
-        socket.send(send)
-    }
-    function onmessage (mes) {
-        console.log(mes)
-        if (mes.data.length === 0 || mes.data === '') {
-            return false
-        }
-        data = evil(mes.data);
-        if (data.type == 'error') {
-            socket.close();
-            clearInterval(timer);
-            timer = null;
-        }
-    }
-    var evil = function (fn) {
-        // 一个变量指向Function，防止有些前端编译工具报错
-        let Fn = Function
-        return new Fn('return ' + fn)()
-    }
-    function socketError () {
-        console.log('服务器连接出错，定时重连......')
-    }
-    function socketClose () {
-        console.log('服务器连接已断开，定时重连......')
-    }
-    function sendMsg () {
-        token = "bearer " + document.getElementById('token').value
-        socket.send(JSON.stringify({
-            type: 'message',
-            content: document.getElementById('msg').value,
-            group: 'all',
-            send_to_uid: 0,
-            token: token,
-            uid: 4
-        }))
-    }
-</script>
