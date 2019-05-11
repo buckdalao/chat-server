@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Libs\Traits\WsMessageTrait;
 use GatewayClient\Gateway;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    use AuthenticatesUsers;
+    use AuthenticatesUsers, WsMessageTrait;
     /**
      * Create a new controller instance.
      *
@@ -76,19 +77,8 @@ class LoginController extends Controller
 
     public function test(Request $request)
     {
-        $response = null;
-        try {
-            $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', 'Bearer '.\request()->get('token'))->post('lib/ping', ['pong' => 1]);
-            dd($response);
-        } catch (\Exception $exception) {
-            if ($exception instanceof \Dingo\Api\Exception\InternalHttpException) {
-                $response = $exception->getResponse();
-            }
-            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
-                $response = ['message' => 'Unauthorized', 'status_code' => 401, 'time' => time(), 'sign' => 'AuthenticationException'];
-            }
-        }
-        dd($response);
+        $this->setUid($request->get('uid'))->setGroupId(1)->message('hello','message')->saveRedis();
+        $response = $this->getMessage();
         return response()->json($response);
     }
 }

@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         //
         Commands\WorkermanServer::class,
-        Commands\RepositoryMakeCommand::class
+        Commands\RepositoryMakeCommand::class,
+        Commands\ChatMessage::class
     ];
 
     /**
@@ -28,6 +29,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        $schedule->command('message save')->everyFiveMinutes();
     }
 
     /**

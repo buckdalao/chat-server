@@ -29,4 +29,12 @@ $api->version(['v1'],[
         $api->post('get', 'HeartbeatController@getGlobal')->middleware('auth:api')->name('api.lib.get');
         $api->post('ping', 'HeartbeatController@ping')->middleware('refreshToken')->name('api.lib.ping');
     });
+    $api->group(['prefix' => 'chat', 'middleware' => 'auth:api'], function ($api) {
+        $api->get('getGroupMes', 'Chat\ChatGroupMessageController@getCroupMes')->name('api.chat.getGroupMes');
+        $api->post('joinGroup', 'Chat\ChatGroupUserController@joinGroup')->name('api.chat.joinGroup');
+        $api->get('getGroupMember', 'Chat\ChatGroupController@getGroupMember')->name('api.chat.getGroupMember');
+        $api->get('getFriendsList', 'Chat\UserController@getFriendsList')->name('api.chat.getFriendsList');
+        $api->get('isFriends', 'Chat\ChatUsersController@isFriends')->name('api.chat.isFriends');
+        $api->post('becomeFriends', 'Chat\ChatUsersController@becomeFriends')->name('api.chat.becomeFriends');
+    });
 });

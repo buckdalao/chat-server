@@ -37,8 +37,8 @@ class Handler
                 if (empty($message['uid']) || empty($message['token']) || Gateway::isUidOnline($message['uid'])) {
                     return Gateway::closeClient($this->connectId);
                 }
-                $this->thisUid = $message['uid'];
-                Gateway::bindUid($this->connectId, $message['uid']);
+                $this->thisUid = (int)$message['uid'];
+                Gateway::bindUid($this->connectId, $this->thisUid);
                 if ($this->ping($message['token']) == false) { // 验证token
                     if ($this->debug) {
                         echo $message['token'] . "\r\n";
@@ -71,6 +71,8 @@ class Handler
                     $message['content'] = $this->refreshToken;
                     $message['token_type'] = 'Bearer';
                     Gateway::sendToCurrentClient($this->messagePack('refresh_token', $message));
+                } else {
+                    $this->pong();
                 }
                 break;
         }
@@ -107,6 +109,9 @@ class Handler
     {
         $bool = true;
         $this->refreshToken = null;
+        if (empty($token)) {
+            return true;
+        }
         try {
             $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', $token)->post('lib/ping', ['ping' => 1]);
             if (is_array($response)) {
@@ -127,5 +132,13 @@ class Handler
             $bool = false;
         }
         return $bool;
+    }
+
+    protected function pong()
+    {
+        $str = json_encode([
+            'type' => 'pong'
+        ]);
+        Gateway::sendToCurrentClient($str);
     }
 }
