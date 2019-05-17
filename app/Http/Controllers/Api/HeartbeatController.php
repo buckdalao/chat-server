@@ -14,11 +14,6 @@ class HeartbeatController extends Controller
         Gateway::$registerAddress = env('REGISTER_SERVER');
     }
 
-    public function getGlobal()
-    {
-        return response()->json($this->registerServer()->getGD(request()->get('key')));
-    }
-
     public function ping(Request $request)
     {
         return $this->response->array(['pong' => \request()->get('ping'), 'token' => $request->headers->get('Authorization')]);

@@ -17,7 +17,7 @@ class ChatGroupRepository  extends EloquentRepository
      * 获取群里的用户
      *
      * @param $groupId
-     * @return array
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
      */
     public function getGroupUser($groupId)
     {

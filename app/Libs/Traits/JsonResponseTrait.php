@@ -47,4 +47,13 @@ trait JsonResponseTrait
         ], $code);
     }
 
+    public function badRequest($mes = '')
+    {
+        return response()->json([
+            'message'     => $mes ?: 'Bad Request',
+            'time'        => time(),
+            'status_code' => 400
+        ], 400);
+    }
+
 }

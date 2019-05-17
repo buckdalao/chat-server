@@ -4,6 +4,9 @@ namespace App\Console\Commands;
 
 use App\Libs\Traits\WsMessageTrait;
 use App\Models\Chat\ChatGroupMessage;
+use App\Repositories\Chat\ChatGroupMessageRepository;
+use App\Repositories\Chat\ChatUsersMessageRepository;
+use App\Repositories\Chat\ChatUsersRepository;
 use Illuminate\Console\Command;
 
 class ChatMessage extends Command
@@ -33,17 +36,20 @@ class ChatMessage extends Command
     /**
      * @var ChatGroupMessage
      */
-    protected $model;
+    protected $chatCroupMessModel;
+
+    protected $chatUserMessRepository;
 
     /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct(ChatGroupMessage $groupMessage)
+    public function __construct(ChatGroupMessage $groupMessage, ChatUsersMessageRepository $chatUsersMessageRepository)
     {
         parent::__construct();
-        $this->model = $groupMessage;
+        $this->chatCroupMessModel = $groupMessage;
+        $this->chatUserMessRepository = $chatUsersMessageRepository;
     }
 
     /**
@@ -61,7 +67,7 @@ class ChatMessage extends Command
         }
         switch ($action) {
             case 'save':
-                $this->saveAllExpireData([$this->model, 'saveExpire']);
+                $this->saveAllExpireData([$this->chatCroupMessModel, 'saveExpire'], [$this->chatUserMessRepository, 'saveExpire']);
                 echo "\033[0;32mSave successfully\033[0m" . PHP_EOL;
                 break;
             case 'list':

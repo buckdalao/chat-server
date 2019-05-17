@@ -2,39 +2,89 @@
 
 namespace App\Repositories\Chat;
 
+use App\Models\Chat\ChatGroup;
 use App\Models\Chat\ChatUsers;
 use App\Models\Chat\User;
 use App\Repositories\EloquentRepository;
+use GatewayClient\Gateway;
 
-class UserRepository  extends EloquentRepository
+class UserRepository extends EloquentRepository
 {
     protected $chatUserModel;
 
-    public function __construct(User $model, ChatUsers $chatUsers)
+    protected $chatGroupModel;
+
+    public function __construct(User $model, ChatUsers $chatUsers, ChatGroup $chatGroup)
     {
         $this->model = $model;
         $this->chatUserModel = $chatUsers;
+        $this->chatGroupModel = $chatGroup;
     }
 
+    /**
+     * DB返回的好友list 带user_id
+     *
+     * @param $userId
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
     public function friendsList($userId)
     {
         return $this->chatUserModel->newQuery()
-            ->where('user_id_1','=', (int)$userId)->orWhere('user_id_2','=', (int)$userId)->get();
+            ->where('user_id_1', '=', (int)$userId)->orWhere('user_id_2', '=', (int)$userId)->get();
     }
 
+    /**
+     * 详细好友列表
+     *
+     * @param $userId
+     * @return array
+     */
     public function friendsListDetailed($userId)
     {
         $list = $this->friendsList($userId);
         $listDetail = [];
-        if ($list){
-            foreach ($list as $v){
+        if ($list) {
+            foreach ($list as $v) {
                 $uid = $v->user_id_1 == $userId ? $v->user_id_2 : $v->user_id_1;
-                $user = $this->model->newQuery()->find($uid, ['email', 'name', 'phone']);
+                $user = $this->model->newQuery()->find($uid, ['id', 'email', 'name', 'phone']);
                 if ($user) {
-                    $listDetail[] = $user->toArray();
+                    $users = $user->toArray();
+                    $users['chat_id'] = $v->id;
+                    $users['is_online'] = Gateway::isUidOnline($uid);
+                    $listDetail[] = $users;
                 }
             }
         }
         return $listDetail;
+    }
+
+    /**
+     * 获取用户的所在群信息
+     *
+     * @param $userId
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function groupList($userId)
+    {
+        // $this->model->newQuery()->with('groupUser')->where('id','=', $userId)->get();
+        $users = $this->model->newQuery()->find($userId);
+        $list = $users->groupUser;
+        $groupList = [];
+        if ($list) {
+            foreach ($list as $v) {
+                $group = $this->chatGroupModel->newQuery()->find((int)$v->group_id, ['group_name', 'group_status']);
+                $groupList[] = [
+                    'group_user_id'   => $v->group_user_id,
+                    'group_id'        => $v->group_id,
+                    'user_id'         => $v->user_id,
+                    'group_user_name' => $v->group_user_name,
+                    'status'          => $v->status,
+                    'created_at'      => $v->created_at,
+                    'group_name'      => $group->group_name,
+                    'group_status'    => $group->group_status,
+                ];
+            }
+        }
+        return $groupList;
     }
 }

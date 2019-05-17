@@ -19,7 +19,7 @@ class Event
 
     public static function onMessage ($connectionId, $data)
     {
-        self::$handler->onMessage($data);
+        self::$handler->onMessage($connectionId, $data);
     }
 
     public static function onClose ($connectionId)

@@ -1,4 +1,7 @@
 <?php
+/**
+ * 此方法已废弃 ---2019-5-14
+ */
 
 namespace App\Libs\Traits;
 

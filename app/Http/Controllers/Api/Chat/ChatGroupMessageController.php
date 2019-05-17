@@ -24,7 +24,7 @@ class ChatGroupMessageController extends Controller
     public function getCroupMes(Request $request)
     {
         if (empty($request->get('group_id'))) {
-            return $this->fail('Parameter error');
+            return $this->badRequest('Parameter error');
         }
         $res = $this->chatGroupMessageRepository->getCurrentMessage($request->get('group_id'), $request->get('limit') ?: 50);
         return $this->successWithData($res);

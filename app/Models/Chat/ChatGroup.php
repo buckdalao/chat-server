@@ -2,10 +2,12 @@
 
 namespace App\Models\Chat;
 
+use App\Libs\Traits\BaseModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ChatGroup extends Model
 {
+    use BaseModelTrait;
     protected $primaryKey = 'group_id';
 
     protected $table = 'chat_group';
@@ -21,7 +23,7 @@ class ChatGroup extends Model
      */
     public function groupOwner()
     {
-        return $this->belongsTo('App\User', 'user_id', 'id');
+        return $this->belongsTo('App\Models\Chat\User', 'user_id', 'id');
     }
 
     /**
@@ -35,6 +37,8 @@ class ChatGroup extends Model
     }
 
     /**
+     * 群成员
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function groupMembers()

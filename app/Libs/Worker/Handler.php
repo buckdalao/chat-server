@@ -2,14 +2,14 @@
 
 namespace App\Libs\Worker;
 
-use App\Libs\Traits\GlobalDataTrait;
+use App\Libs\Traits\WsMessageTrait;
 use GatewayWorker\Lib\Gateway;
+use Illuminate\Support\Carbon;
 
 class Handler
 {
-    use GlobalDataTrait;
+    use WsMessageTrait;
 
-    protected $connectId;
 
     protected $thisUid = 0;
 
@@ -21,13 +21,11 @@ class Handler
 
     public function connect($connectId)
     {
-        $this->connectId = $connectId;
-        Gateway::joinGroup($connectId, 'all');
         ini_set('display_errors', 'off');
         error_reporting(E_ERROR);
     }
 
-    public function onMessage($data)
+    public function onMessage($connectionId, $data)
     {
         $message = json_decode($data, true);
         $this->refreshToken = null;
@@ -35,10 +33,10 @@ class Handler
             case 'login':
                 // 消息类型不是登录视为非法请求，关闭连接
                 if (empty($message['uid']) || empty($message['token']) || Gateway::isUidOnline($message['uid'])) {
-                    return Gateway::closeClient($this->connectId);
+                    return Gateway::closeClient($connectionId);
                 }
                 $this->thisUid = (int)$message['uid'];
-                Gateway::bindUid($this->connectId, $this->thisUid);
+                Gateway::bindUid($connectionId, $this->thisUid);
                 if ($this->ping($message['token']) == false) { // 验证token
                     if ($this->debug) {
                         echo $message['token'] . "\r\n";
@@ -46,15 +44,26 @@ class Handler
                     }
                     $message['content'] = 'Unauthorized';
                     Gateway::sendToCurrentClient($this->messagePack('error', $message));
-                } else {
-                    Gateway::sendToGroup('all', $this->messagePack('login'));
                 }
+                // 获取用户的群组  并加入群
+                $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', $message['token'])->get('chat/getGroupList');
+                if (sizeof($response['data'])) {
+                    foreach ($response['data'] as $group) {
+                        if ($group['group_id'])
+                            Gateway::joinGroup($connectionId, $group['group_id']);
+                    }
+                }
+                Gateway::sendToCurrentClient($this->messagePack('notify', ['content' => 'success']));
                 break;
             case 'message':
                 if ($message['send_to_uid']) {
-                    Gateway::sendToUid([$message['send_to_uid'], $message['uid']], $this->messagePack('msg', $message));
-                } elseif ($message['group']) {
-                    Gateway::sendToGroup($message['group'], $this->messagePack('msg', $message));
+                    Gateway::sendToUid([$message['send_to_uid'], $this->thisUid], $this->messagePack('message', $message));
+                    $this->setChatId($message['chat_id'])->message($message, 'message')->saveRedis();
+                    $this->clear();
+                } elseif ($message['group_id']) {
+                    Gateway::sendToGroup($message['group_id'], $this->messagePack('message', $message));
+                    $this->setGroupId($message['group_id'])->message($message, 'message')->saveRedis();
+                    $this->clear();
                 }
                 break;
 
@@ -78,29 +87,18 @@ class Handler
         }
     }
 
-    protected function messagePack($type, $cont = [], $send_user = '')
+    protected function messagePack($type, $cont = [])
     {
-        $user = $this->registerServer()->getCurrentUser($this->thisUid);
         $mes = $cont['content'] ? $cont['content'] : '';
-        $groups = Gateway::getAllGroupIdList();
-        @sort($groups);
-        foreach ($groups as $group) {
-            $allGroup[] = ['group_name' => $group, 'img' => '/img/touxiang.png', 'group_id' => ''];
-        }
         $data = [
-            'type'           => $type,
-            'content'        => $type == 'login' ? $user['name'] . '加入聊天室' : $mes,
-            'user_name'      => $send_user ? $send_user : $user['user_name'],
-            'time'           => date('Y-m-d H:i:s'),
-            'from_uid'       => $this->thisUid,
-            'from_client'    => $this->thisUid ? Gateway::getClientIdByUid($this->thisUid) : '',
-            'all_user'       => $this->registerServer()->getGD($this->saveUserKey),
-            'all_group'      => $allGroup,
-            'send_to_group'  => $cont['group'] ? $cont['group'] : ($cont['send_to_uid'] ? '' : 'all'),
-            'send_to_uid'    => $cont['send_to_uid'],
-            'send_to_client' => $cont['send_to_uid'] ? Gateway::getClientIdByUid($cont['send_to_uid']) : '',
-            'token_type'     => $cont['token_type'],
-            'server'         => 'Gateway'
+            'type'       => $this->getType($type),
+            'data'       => $mes,
+            'time'       => Carbon::now()->timestamp,
+            'uid'        => $this->thisUid,
+            'user_name'  => $cont['user_name'],
+            'chat_id'    => $cont['chat_id'] ?: 0,
+            'group_id'   => $cont['group_id'] ?: 0,
+            'token_type' => $cont['token_type'],
         ];
         return json_encode($data);
     }
@@ -137,7 +135,7 @@ class Handler
     protected function pong()
     {
         $str = json_encode([
-            'type' => 'pong'
+            'type' => $this->getType('pong')
         ]);
         Gateway::sendToCurrentClient($str);
     }

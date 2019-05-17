@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Repositories\Chat\UserRepository;
 use GatewayClient\Gateway;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -9,13 +10,15 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
+    protected $userRepository;
+
     /**
      * Create a new AuthController instance.
      * 要求附带email和password（数据来源users表）
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(UserRepository $userRepository)
     {
         // 这里额外注意了：官方文档样例中只除外了『login』
         // 这样的结果是，token 只能在有效期以内进行刷新，过期无法刷新
@@ -26,6 +29,7 @@ class AuthController extends Controller
         // 但是我推荐用 『jwt.auth』，效果是一样的，但是有更加丰富的报错信息返回
 
         Gateway::$registerAddress = env('REGISTER_SERVER');
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -46,8 +50,9 @@ class AuthController extends Controller
         if (!$token = auth('api')->attempt($credentials)) {
             return $this->fail('请检查邮箱和密码是否正确', 401);
         }
-        $this->registerServer()->addUser(auth('api')->user());
-        return $this->respondWithToken($token);
+        $friendsList = $this->userRepository->friendsListDetailed(auth('api')->user()->id);
+        $groupList = $this->userRepository->groupList(auth('api')->user()->id);
+        return $this->respondWithToken($token, $friendsList, $groupList);
     }
 
     /**
@@ -68,8 +73,6 @@ class AuthController extends Controller
     public function logout()
     {
         auth('api')->logout();
-
-        $this->registerServer()->deleteUser(\request()->get('uid'));
 
         return $this->success('Successfully logged out');
     }
@@ -93,14 +96,16 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token)
+    protected function respondWithToken($token, $friendsList = [], $groupList = [])
     {
         return response()->json([
             'status_code'  => 200,
             'access_token' => $token,
             'token_type'   => 'Bearer',
             'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'users'        => auth('api')->user()
+            'users'        => auth('api')->user(),
+            'friend_list'  => $friendsList,
+            'group_list'   => $groupList,
         ]);
     }
 }

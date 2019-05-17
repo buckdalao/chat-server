@@ -4,11 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Chat Server</title>
+    <title>Laravel</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="http://unpkg.com/iview/dist/styles/iview.css">
 
     <!-- Styles -->
     <style>
@@ -30,232 +29,128 @@
             display: flex;
             justify-content: center;
         }
-        .layout{
-            border: 1px solid #d7dde4;
-            background: #f5f7f9;
-            position: relative;
-            border-radius: 4px;
-            overflow: hidden;
-            width: 1200px;
-            max-height: 800px;
-        }
-        .layout-header-bar{
-            background: #fff;
-            box-shadow: 0 1px 1px rgba(0,0,0,.1);
-        }
-        .menu-item span{
-            display: inline-block;
-            overflow: hidden;
-            width: 69px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            vertical-align: bottom;
-            transition: width .2s ease .2s;
-        }
-        .menu-item i{
-            transform: translateX(0px);
-            transition: font-size .2s ease, transform .2s ease;
-            vertical-align: middle;
-            font-size: 16px;
-        }
-        .collapsed-menu span{
-            width: 0px;
-            transition: width .2s ease;
-        }
-        .collapsed-menu i{
-            transform: translateX(5px);
-            transition: font-size .2s ease .2s, transform .2s ease .2s;
-            vertical-align: middle;
-            font-size: 22px;
-        }
-    </style>
-    <style type="text/less">
-        .m-message {
-            padding: 10px 15px;
-            overflow-y: scroll;
-            height: ~'calc(100% - 190px)';
 
-        li {
-            margin-bottom: 15px;
+        .position-ref {
+            position: relative;
         }
-        .time {
-            margin: 7px 0;
+
+        .top-right {
+            position: absolute;
+            right: 10px;
+            top: 18px;
+        }
+
+        .content {
             text-align: center;
-
-        > span {
-              display: inline-block;
-              padding: 0 18px;
-              font-size: 12px;
-              color: #fff;
-              border-radius: 2px;
-              background-color: #dcdcdc;
-          }
-        }
-        .avatar {
-            float: left;
-            margin: 0 10px 0 0;
-            border-radius: 3px;
-        }
-        .text {
-            display: inline-block;
-            position: relative;
-            padding: 0 10px;
-            max-width: ~'calc(100% - 40px)';
-            min-height: 30px;
-            line-height: 2.5;
-            font-size: 12px;
-            text-align: left;
-            word-break: break-all;
-            background-color: #fafafa;
-            border-radius: 4px;
-
-        &:before {
-             content: " ";
-             position: absolute;
-             top: 9px;
-             right: 100%;
-             border: 6px solid transparent;
-             border-right-color: #fafafa;
-         }
-        img {
-            vertical-align: middle
-        }
         }
 
-        .self {
-            text-align: right;
+        .title {
+            font-size: 84px;
+        }
 
-        .avatar {
-            float: right;
-            margin: 0 0 0 10px;
+        .links > a {
+            color: #636b6f;
+            padding: 0 25px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .1rem;
+            text-decoration: none;
+            text-transform: uppercase;
         }
-        .text {
-            background-color: #b2e281;
 
-        &:before {
-             right: inherit;
-             left: 100%;
-             border-right-color: transparent;
-             border-left-color: #b2e281;
-         }
-        }
-        }
+        .m-b-md {
+            margin-bottom: 30px;
         }
     </style>
 </head>
 <body>
 <div class="flex-center position-ref full-height">
+    @if (Route::has('login'))
+        <div class="top-right links">
+            @auth
+            <a href="{{ url('/home') }}">Home</a>
+            @else
+                <a href="{{ route('login') }}">Login</a>
+
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}">Register</a>
+                @endif
+                @endauth
+        </div>
+    @endif
+
     <div class="content">
-        <div id="app" class="layout">
-            <Layout>
-                <Sider breakpoint="md" collapsible :collapsed-width="78" v-model="isCollapsed">
-                    <i-menu active-name="1-2" theme="dark" width="auto" :class="menuitemClasses">
-                        <menu-item name="1-1">
-                            <Icon type="ios-navigate"></Icon>
-                            <span>{{ $users['name'] }}</span>
-                        </menu-item>
-                        <menu-item name="1-2">
-                            <Icon type="ios-search"></Icon>
-                            <span>Option 2</span>
-                        </menu-item>
-                        <menu-item name="1-3">
-                            <Icon type="ios-settings"></Icon>
-                            <span>Option 3</span>
-                        </menu-item>
-                    </i-menu>
-                    <div slot="trigger"></div>
-                </Sider>
-                <Layout>
-                    <Content :style="{margin: '20px', background: '#fff', minHeight: '220px'}">
-                        <div class="m-message" v-scroll-bottom="session.messages">
-                            <ul>
-                                <li v-for="item in session.messages">
-                                    <p v-if="item.showTime" class="time"><span>@{{item.date | time}}</span></p>
-                                    <div class="main" :class="{ self: item.self }">
-                                        <img class="avatar" width="30" height="30" :src="avatar(item)"/>
-                                        <div class="text" v-html="html(item.text)"></div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </Content>
-                </Layout>
-            </Layout>
+        <div class="title m-b-md">
+            Laravel
+        </div>
+
+        <div class="links">
+            <a href="https://laravel.com/docs">Docs</a>
+            <a href="https://laracasts.com">Laracasts</a>
+            <a href="https://laravel-news.com">News</a>
+            <a href="https://blog.laravel.com">Blog</a>
+            <a href="https://nova.laravel.com">Nova</a>
+            <a href="https://forge.laravel.com">Forge</a>
+            <a href="https://github.com/laravel/laravel">GitHub</a>
         </div>
     </div>
+    <input type="text" id="token"><button onclick="connect()">连接</button><br>
+    <input type="text" id="msg"><button onclick="sendMsg()">发送</button>
 </div>
 </body>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
-<script type="text/javascript" src="http://unpkg.com/iview/dist/iview.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
-<script>
-    new Vue({
-        el: '#app',
-        data: {
-            isCollapsed: false,
-            session: {
-                userId: parseInt('{{ $users['id'] }}'),
-                messages: [
-                    {self: true, text: 'hello', showTime: true, date: '2019-05-08 16:53:02'},
-                    {self: false, text: 'hello', showTime: false, date: '2019-05-08 16:53:02'},
-                    {self: true, text: 'hello', showTime: true, date: '2019-05-08 16:53:02'}
-                ]
-            },
-            userList: [
-                {userId: 3, img: 'resources/emoji/xxx.png', name: 'pw'}
-            ],
-            users: {
-                userId: parseInt('{{ $users['id'] }}'),
-                img: 'a/a.png',
-                name: 'pw'
-            }
-        },
-        computed: {
-            menuitemClasses: function () {
-                return [
-                    'menu-item',
-                    this.isCollapsed ? 'collapsed-menu' : ''
-                ]
-            },
-            sessionUser () {
-                let users = this.userList.filter(item => item.userId === this.session.userId)
-                return users[0]
-            }
-        },
-        methods: {
-            // 筛选出用户头像
-            avatar (item) {
-                // 如果是自己发的消息显示登录用户的头像
-                let user = item.self ? this.users : this.sessionUser
-                return user && user.img
-            },
-            html (str) {
-                return str.replace(/\\/g, '')
-            }
-        },
-        filters: {
-            // 将日期过滤为 hour:minutes
-            time (date) {
-                let d = date
-                if (typeof date === 'string') {
-                    date = new Date(date)
-                }
-                if (date.getDay() !== new Date().getDay()) {
-                    return d
-                }
-                return date.getHours() + ':' + date.getMinutes()
-            }
-        },
-        directives: {
-            // 发送消息后滚动到底部
-            'scroll-bottom' (el) {
-                Vue.nextTick(() => {
-                    el.scrollTop = el.scrollHeight - el.clientHeight
-                })
-            }
-        }
-    })
-</script>
 </html>
-
+<script>
+    var socket;
+    var token;
+    var timer;
+    function connect(){
+        token = "bearer " + document.getElementById('token').value
+        socket = new WebSocket('ws://reconsitutionfs.com:9526')
+        socket.onopen = onopensocket
+        socket.onmessage = onmessage
+        socket.onerror = socketError
+        socket.onclose = socketClose
+        timer = setInterval(function(){
+            socket.send('{"type":"ping"}')
+        },1000*25)
+    }
+    function onopensocket () {
+        var send = '{"type":"login","uid":"1","token":"'+ token +'"}'
+        console.log('连接服务器成功')
+        socket.send(send)
+    }
+    function onmessage (mes) {
+        console.log(mes)
+        if (mes.data.length === 0 || mes.data === '') {
+            return false
+        }
+        data = evil(mes.data);
+        if (data.type == 'error') {
+            socket.close();
+            clearInterval(timer);
+            timer = null;
+        }
+    }
+    var evil = function (fn) {
+        // 一个变量指向Function，防止有些前端编译工具报错
+        let Fn = Function
+        return new Fn('return ' + fn)()
+    }
+    function socketError () {
+        console.log('服务器连接出错，定时重连......')
+    }
+    function socketClose () {
+        console.log('服务器连接已断开，定时重连......')
+    }
+    function sendMsg () {
+        token = "bearer " + document.getElementById('token').value
+        socket.send(JSON.stringify({
+            type: 'message',
+            content: document.getElementById('msg').value,
+            group_id: 0,
+            send_to_uid: 4,
+            token: token,
+            uid: 1
+        }))
+    }
+</script>

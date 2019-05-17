@@ -24,7 +24,7 @@ class ChatGroupUserController extends Controller
     public function joinGroup(Request $request)
     {
         if (empty($request->user()->id) || empty($request->get('group_id'))){
-            return $this->fail('Parameter error');
+            return $this->badRequest('Parameter error');
         }
         $res = $this->chatGroupUserRepository->joinGroup($request->user(), $request->get('group_id'));
         return $res ? $this->success('加入成功') : $this->fail('加入失败');

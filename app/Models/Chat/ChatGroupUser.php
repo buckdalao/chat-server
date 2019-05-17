@@ -2,10 +2,13 @@
 
 namespace App\Models\Chat;
 
+use App\Libs\Traits\BaseModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ChatGroupUser extends Model
 {
+    use BaseModelTrait;
+
     protected $primaryKey = 'group_user_id';
 
     protected $table = 'chat_group_users';
@@ -31,6 +34,6 @@ class ChatGroupUser extends Model
      */
     public function users()
     {
-        return $this->belongsTo('App\User', 'user_id', 'id');
+        return $this->belongsTo('App\Models\Chat\User', 'user_id', 'id');
     }
 }

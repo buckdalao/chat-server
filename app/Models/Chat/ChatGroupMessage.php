@@ -2,10 +2,13 @@
 
 namespace App\Models\Chat;
 
+use App\Libs\Traits\BaseModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ChatGroupMessage extends Model
 {
+    use BaseModelTrait;
+
     protected $primaryKey = 'group_mes_id';
 
     protected $table = 'chat_group_message';
