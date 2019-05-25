@@ -19,8 +19,9 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->default('0000-00-00 00:00:00');
             $table->string('mb_prefix')->comment('手机前缀+86');
-            $table->string('phone');
-            $table->string('password');
+            $table->string('phone', 50);
+            $table->string('password',100);
+            $table->string('photo',100)->comment('头像路径');
             $table->string('remember_token', 100);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default('0000-00-00 00:00:00');

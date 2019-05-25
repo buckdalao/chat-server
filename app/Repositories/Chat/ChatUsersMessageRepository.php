@@ -60,18 +60,17 @@ class ChatUsersMessageRepository extends EloquentRepository
         if ($chatId) {
             $mes = $this->setChatId($chatId)->getMessage();
             if (sizeof($mes) == 0) {
-                if ($limit) {
-                    $mes = $this->model->newQuery()->from($this->model->alias('cum'))->
-                    leftJoin($this->user->alias('u'), 'u.id', '=', 'cum.user_id')
-                        ->where('cum.chat_id', '=', $chatId)->orderBy('cum.' . $this->model->getKeyName(), 'asc')->limit($limit)
-                        ->get(['cum.user_mes_id', 'cum.chat_id', 'cum.content as data', 'cum.mes_type as type', 'cum.send_time as time',
-                            'cum.status', 'cum.user_id as uid', 'cum.to_user_id', 'u.name as user_name']);
-                } else {
-                    $mes = $this->model->newQuery()->from($this->model->alias('cum'))->
-                    leftJoin($this->user->alias('u'), 'u.id', '=', 'cum.user_id')
-                        ->where('cum.chat_id', '=', $chatId)->orderBy('cum.' . $this->model->getKeyName(), 'asc')->limit($limit)
-                        ->get(['cum.user_mes_id', 'cum.chat_id', 'cum.content as data', 'cum.mes_type as type', 'cum.send_time as time',
-                            'cum.status', 'cum.user_id as uid', 'cum.to_user_id', 'u.name as user_name']);
+                $mes = $this->model->newQuery()->from($this->model->alias('cum'))->
+                leftJoin($this->user->alias('u'), 'u.id', '=', 'cum.user_id')
+                    ->where('cum.chat_id', '=', $chatId)->orderBy('cum.' . $this->model->getKeyName(), 'asc')->limit($limit ?: 50)
+                    ->get(['cum.user_mes_id', 'cum.chat_id', 'cum.content as data', 'cum.mes_type as type', 'cum.send_time as time',
+                        'cum.status', 'cum.user_id as uid', 'cum.to_user_id', 'u.name as user_name', 'u.photo']);
+                if ($mes) {
+                    collect($mes)->map(function($item){
+                        if ($item->photo) {
+                            $item->photo = asset($item->photo);
+                        }
+                    });
                 }
             }
         }

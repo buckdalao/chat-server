@@ -98,12 +98,14 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token, $friendsList = [], $groupList = [])
     {
+        $users = auth('api')->user()->toArray();
+        $users['photo'] = asset($users['photo']);
         return response()->json([
             'status_code'  => 200,
             'access_token' => $token,
             'token_type'   => 'Bearer',
             'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'users'        => auth('api')->user(),
+            'users'        => $users,
             'friend_list'  => $friendsList,
             'group_list'   => $groupList,
         ]);

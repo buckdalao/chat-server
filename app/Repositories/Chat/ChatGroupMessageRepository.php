@@ -9,7 +9,7 @@ use App\Models\Chat\User;
 use App\Repositories\EloquentRepository;
 use Illuminate\Support\Facades\Redis;
 
-class ChatGroupMessageRepository  extends EloquentRepository
+class ChatGroupMessageRepository extends EloquentRepository
 {
     use WsMessageTrait;
 
@@ -35,7 +35,7 @@ class ChatGroupMessageRepository  extends EloquentRepository
         $key = $key ?: $this->getKey();
         if ($key) {
             $len = Redis::llen($key);
-            for ($i=0; $i < $len; $i++){
+            for ($i = 0; $i < $len; $i++) {
                 $str = Redis::lpop($key);
                 $data = json_encode($str, true);
                 $this->model->create([
@@ -56,30 +56,29 @@ class ChatGroupMessageRepository  extends EloquentRepository
      * @param int $limit
      * @return array|\Illuminate\Database\Eloquent\Collection|static[]
      */
-    public function getCurrentMessage($groupID, $limit = 0)
+    public function getGroupMessage($groupID, $limit = 0)
     {
         $mes = $this->setGroupId($groupID)->getMessage();
         if (sizeof($mes)) {
             return $mes;
-        }else{
-            if ($limit){
-                $mes = $this->model->newQuery()->from($this->model->alias('cgm'))
-                    ->leftJoin($this->chatGroupUser->alias('cgu'), function($join){
-                        $join->on('cgm.group_id', '=', 'cgu.group_id')->on('cgm.user_id', '=', 'cgu.user_id');
-                    })
-                    ->where('cgm.group_id', $groupID)->orderBy($this->model->getKeyName(), 'asc')->limit($limit)->get([
+        } else {
+            $mes = $this->model->newQuery()->from($this->model->alias('cgm'))
+                ->leftJoin($this->chatGroupUser->alias('cgu'), function ($join) {
+                    $join->on('cgm.group_id', '=', 'cgu.group_id')->on('cgm.user_id', '=', 'cgu.user_id');
+                })
+                ->leftJoin($this->user->alias('u'), function ($join) {
+                    $join->on('cgm.user_id', '=', 'u.id');
+                })
+                ->where('cgm.group_id', $groupID)->orderBy($this->model->getKeyName(), 'asc')->limit($limit ?: 50)->get([
                     'cgm.group_mes_id', 'cgm.group_id', 'cgm.content as data', 'cgm.send_time as time', 'cgm.mes_type as type', 'cgm.user_id as uid', 'cgm.status',
-                        'cgu.group_user_name as user_name'
+                    'cgu.group_user_name as user_name', 'u.photo'
                 ]);
-            }else {
-                $mes = $this->model->newQuery()->from($this->model->alias('cgm'))
-                    ->leftJoin($this->chatGroupUser->alias('cgu'), function($join){
-                        $join->on('cgm.group_id', '=', 'cgu.group_id')->on('cgm.user_id', '=', 'cgu.user_id');
-                    })
-                    ->where('cgm.group_id', $groupID)->orderBy($this->model->getKeyName(), 'asc')->get([
-                        'cgm.group_mes_id', 'cgm.group_id', 'cgm.content as data', 'cgm.send_time as time', 'cgm.mes_type as type', 'cgm.user_id as uid', 'cgm.status',
-                        'cgu.group_user_name as user_name'
-                    ]);
+            if ($mes) {
+                collect($mes)->map(function($item){
+                    if ($item->photo) {
+                        $item->photo = asset($item->photo);
+                    }
+                });
             }
             return $mes;
         }

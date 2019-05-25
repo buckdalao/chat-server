@@ -77,13 +77,6 @@ class LoginController extends Controller
 
     public function test(Request $request)
     {
-        if ($request->get('group_id')) {
-            $this->setUid($request->get('uid'))->setGroupId($request->get('group_id'))->message('hello', 'message')->saveRedis();
-        }
-        if ($request->get('toUid')) {
-            $this->setUid($request->get('uid'), $request->get('toUid'))->message('hello', 'message')->saveRedis();
-        }
-        $response = $this->getMessage();
-        return response()->json($response);
+        return response()->json();
     }
 }

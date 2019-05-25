@@ -24,6 +24,6 @@ class Event
 
     public static function onClose ($connectionId)
     {
-
+        self::$handler->onClose($connectionId);
     }
 }

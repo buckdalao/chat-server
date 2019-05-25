@@ -50,12 +50,13 @@ trait WsMessageTrait
         $data = [
             'type'      => $this->getType($type),
             'data'      => $mes['content'],
-            'uid'       => $mes['uid'],
+            'uid'       => (int)$mes['uid'],
             'user_name' => $mes['user_name'],
-            'chat_id'   => $this->chatId,
-            'group_id'  => $this->groupId,
+            'chat_id'   => (int)$this->chatId ?: 0,
+            'group_id'  => (int)$this->groupId ?: 0,
             'time'      => Carbon::now()->timestamp,
-            'disable'   => $disable
+            'disable'   => $disable,
+            'photo'     => $mes['photo']
         ];
         $this->mesData = $data;
         return $this;

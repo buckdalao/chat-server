@@ -149,8 +149,10 @@
             content: document.getElementById('msg').value,
             group_id: 0,
             send_to_uid: 4,
-            token: token,
-            uid: 1
+            chat_id: 1,
+            uid: 1,
+            user_name: 'buck',
+            photo: 'http://reconsitutionfs.com/storage/photos/photo.jpg'
         }))
     }
 </script>

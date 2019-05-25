@@ -21,12 +21,12 @@ class ChatUsersController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function isFriends(Request $request)
+    public function isFriends(Request $request, $friendId)
     {
-        if (empty($request->user()->id) || empty($request->get('friend_id'))) {
+        if (empty($request->user()->id) || empty($friendId)) {
             return $this->badRequest('Parameter error');
         }
-        $res = $this->chatUserRepository->isFriends($request->user()->id, $request->get('friend_id'));
+        $res = $this->chatUserRepository->isFriends($request->user()->id, $friendId);
         return $this->successWithData($res);
     }
 

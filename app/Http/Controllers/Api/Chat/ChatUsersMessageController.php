@@ -26,7 +26,7 @@ class ChatUsersMessageController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getChatMessage(Request $request)
+    public function getUserChatMessage(Request $request)
     {
         if (empty($request->user()->id) || (empty($request->get('friend_id')) && empty($request->get('chat_id')))){
             return $this->badRequest();

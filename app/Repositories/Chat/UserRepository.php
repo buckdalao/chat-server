@@ -46,10 +46,11 @@ class UserRepository extends EloquentRepository
         if ($list) {
             foreach ($list as $v) {
                 $uid = $v->user_id_1 == $userId ? $v->user_id_2 : $v->user_id_1;
-                $user = $this->model->newQuery()->find($uid, ['id', 'email', 'name', 'phone']);
+                $user = $this->model->newQuery()->find($uid, ['id', 'email', 'name', 'phone', 'photo']);
                 if ($user) {
                     $users = $user->toArray();
                     $users['chat_id'] = $v->id;
+                    $users['photo'] = asset($users['photo']);
                     $users['is_online'] = Gateway::isUidOnline($uid);
                     $listDetail[] = $users;
                 }
@@ -72,7 +73,7 @@ class UserRepository extends EloquentRepository
         $groupList = [];
         if ($list) {
             foreach ($list as $v) {
-                $group = $this->chatGroupModel->newQuery()->find((int)$v->group_id, ['group_name', 'group_status']);
+                $group = $this->chatGroupModel->newQuery()->find((int)$v->group_id, ['group_name', 'group_status', 'photo']);
                 $groupList[] = [
                     'group_user_id'   => $v->group_user_id,
                     'group_id'        => $v->group_id,
@@ -82,6 +83,7 @@ class UserRepository extends EloquentRepository
                     'created_at'      => $v->created_at,
                     'group_name'      => $group->group_name,
                     'group_status'    => $group->group_status,
+                    'photo'           => asset($group->photo),
                 ];
             }
         }
