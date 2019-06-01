@@ -21,20 +21,38 @@ class ChatUsersMessageController extends Controller
     }
 
     /**
-     * 获取登录用户对应好友的消息 参数 friend_id or chat_id
+     * 获取登录用户对应好友的消息 参数 chat_id
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getUserChatMessage(Request $request)
+    public function getChatMessageByChatId(Request $request, $chatId)
     {
-        if (empty($request->user()->id) || (empty($request->get('friend_id')) && empty($request->get('chat_id')))){
+        if (empty($request->user()->id) || empty($chatId)){
             return $this->badRequest();
         }
-        if ($request->get('chat_id')){
-            $chatId = $request->get('chat_id');
-        }else{
-            $chat = $this->chatUsersRepository->getChat($request->user()->id, $request->get('friend_id'));
+        $mesList= [];
+        if($chatId){
+            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId);
+        }
+        return $this->successWithData($mesList);
+    }
+
+    /**
+     * 获取登录用户对应好友的消息 参数 friend_id
+     *
+     * @param Request $request
+     * @param         $uid
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getChatMessageByUid(Request $request, $uid)
+    {
+        if (empty($request->user()->id) || empty($uid)){
+            return $this->badRequest();
+        }
+        $chatId = 0;
+        $chat = $this->chatUsersRepository->getChat($request->user()->id, $uid);
+        if ($chat) {
             $chatId = $chat->id;
         }
         $mesList= [];

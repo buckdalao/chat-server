@@ -38,8 +38,9 @@ class ChatGroupRepository extends EloquentRepository
             $groupId = $this->model->newQuery()->insertGetId([
                 'group_name' => $groupName,
                 'user_id'    => $userId,
-                'photo'      => 'storage/photos/group_photo.jpg'
+                'photo'      => 'storage/photos/group_photo.jpg' // default
             ]);
+            $this->model->newQuery()->whereKey($groupId)->update(['group_number' => 100000 + $groupId]);
         }
         return $groupId;
     }

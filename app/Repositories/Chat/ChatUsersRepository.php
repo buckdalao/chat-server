@@ -64,4 +64,23 @@ class ChatUsersRepository extends EloquentRepository
             return $this->model->newQuery()->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->first();
         }
     }
+
+    /**
+     * 通过chat id获取好友id
+     *
+     * @param $uid
+     * @param $chatId
+     * @return int
+     */
+    public function getFriendIdByChatId($uid, $chatId)
+    {
+        $friendId = 0;
+        if ($uid && $chatId) {
+            $res = $this->model->find($chatId);
+            if ($res) {
+                $friendId = $res->user_id_1 == $uid ? $res->user_id_2 : $res->user_id_1;
+            }
+        }
+        return $friendId;
+    }
 }

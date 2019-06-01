@@ -19,6 +19,7 @@ class UserRepository extends EloquentRepository
         $this->model = $model;
         $this->chatUserModel = $chatUsers;
         $this->chatGroupModel = $chatGroup;
+        Gateway::$registerAddress = env('REGISTER_SERVER');
     }
 
     /**
@@ -63,7 +64,7 @@ class UserRepository extends EloquentRepository
      * 获取用户的所在群信息
      *
      * @param $userId
-     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     * @return array
      */
     public function groupList($userId)
     {
@@ -88,5 +89,14 @@ class UserRepository extends EloquentRepository
             }
         }
         return $groupList;
+    }
+
+    /**
+     * @param $uid
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getUserById($uid)
+    {
+        return $this->model->newQuery()->whereKey($uid)->first();
     }
 }

@@ -13,7 +13,7 @@ class ChatGroup extends Model
     protected $table = 'chat_group';
 
     protected $fillable = [
-        'group_name', 'group_status', 'user_id'
+        'group_name', 'group_status', 'user_id', 'group_number', 'photo'
     ];
 
     /**
@@ -44,5 +44,15 @@ class ChatGroup extends Model
     public function groupMembers()
     {
         return $this->hasMany('App\Models\Chat\ChatGroupUser', 'group_id','group_id');
+    }
+
+    /**
+     * 入群申请
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function apply()
+    {
+        return $this->hasMany('App\Models\Chat\ChatApply', 'group_id', 'group_id');
     }
 }

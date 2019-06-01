@@ -22,7 +22,7 @@ trait WsMessageTrait
 
     protected $saveMax = 50;
 
-    protected $mesType = [0 => 'message', 1 => 'notify', 2 => 'pong', 5 => 'error', 6 => 'refresh_token'];
+    protected $mesType = [0 => 'message', 1 => 'notify', 2 => 'pong', 3 => 'connect', 5 => 'error', 6 => 'refresh_token'];
 
     public function setChatId($chatId)
     {
@@ -45,11 +45,11 @@ trait WsMessageTrait
         }
     }
 
-    public function message(array $mes, $type, $disable = false)
+    public function setMessage(array $mes, $disable = false)
     {
         $data = [
-            'type'      => $this->getType($type),
-            'data'      => $mes['content'],
+            'type'      => $mes['type'],
+            'data'      => $mes['data'],
             'uid'       => (int)$mes['uid'],
             'user_name' => $mes['user_name'],
             'chat_id'   => (int)$this->chatId ?: 0,
@@ -66,13 +66,13 @@ trait WsMessageTrait
     {
         if ($key = $this->getKey()) {
             if ($this->saveMax && Redis::llen($key) >= $this->saveMax) {
-                $overflow = Redis::lpop($key);
-                $expKey = $this->getKey(true);
-                if ($overflow && $expKey) {
-                    Redis::rpush($expKey, $overflow);
-                    if (Redis::ttl($expKey) < 0) {
-                        Redis::expire($expKey, 3600 * 24 * 7);
-                    }
+                Redis::lpop($key);
+            }
+            $expKey = $this->getKey(true);
+            if ($expKey) {
+                Redis::rpush($expKey, json_encode($this->mesData));
+                if (Redis::ttl($expKey) < 0) {
+                    Redis::expire($expKey, 3600 * 24 * 7);
                 }
             }
             Redis::rpush($key, json_encode($this->mesData));
@@ -80,11 +80,12 @@ trait WsMessageTrait
                 Redis::expire($key, $exp);
             }
         }
+        $this->clear();
     }
 
-    public function getKey($isExpire = false)
+    public function getKey($isQueue = false)
     {
-        $exp = $isExpire ? ':exp' : '';
+        $exp = $isQueue ? ':queue' : '';
         if ($this->chatId) {
             return 'mes:toChat:' . $this->chatId . $exp;
         } elseif ($this->groupId) {
@@ -111,7 +112,7 @@ trait WsMessageTrait
      * @param        $callback   function namespace
      * @param string $key
      */
-    public function saveExpireData($callback, $key = '')
+    public function saveQueueData($callback, $key = '')
     {
         $key = $key ? $key : $this->getKey(true);
         if ($key) {
@@ -124,23 +125,23 @@ trait WsMessageTrait
         }
     }
 
-    public function saveAllExpireData($callbackToGroup, $callbackToUser)
+    public function saveAllQueueData($callbackToGroup, $callbackToUser)
     {
-        $allKey = $this->getAllExpireKey();
+        $allKey = $this->getAllQueueKey();
         if (sizeof($allKey)) {
             foreach ($allKey as $key) {
                 if (preg_match('/toGroup/', $key)) {
-                    $this->saveExpireData($callbackToGroup, $key);
+                    $this->saveQueueData($callbackToGroup, $key);
                 } else {
-                    $this->saveExpireData($callbackToUser, $key);
+                    $this->saveQueueData($callbackToUser, $key);
                 }
             }
         }
     }
 
-    public function getAllExpireKey()
+    public function getAllQueueKey()
     {
-        return Redis::keys('mes:*:exp');
+        return Redis::keys('mes:*:queue');
     }
 
     public function getKeySaveCount($key = null)

@@ -33,7 +33,7 @@ class ChatGroupUserRepository extends EloquentRepository
         $groupInfo = $this->groupModel->where('group_id', '=', (int)$groupId)->first();
         $bool = false;
         if ($userInfo->id && $groupInfo->group_id) {
-            $verifyGroup = $this->where('user_id', '=', $userInfo->id)->where('group_id', '=', $groupId)->first(['group_user_id']);
+            $verifyGroup = $this->model->where('user_id', '=', $userInfo->id)->where('group_id', '=', $groupId)->first(['group_user_id']);
             if (!$verifyGroup) {
                 $this->model->create([
                     'user_id' => $userInfo->id,
@@ -44,5 +44,14 @@ class ChatGroupUserRepository extends EloquentRepository
             }
         }
         return $bool;
+    }
+
+    /**
+     * @param $groupId
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getGroupUserList($groupId)
+    {
+        return $this->model->newQuery()->where('group_id', '=', $groupId)->get();
     }
 }

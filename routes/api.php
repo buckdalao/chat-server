@@ -32,19 +32,31 @@ $api->version(['v1'], [
     $api->group([
         'prefix' => 'chat',
         'middleware' => 'auth:api',
-        'where' => ['group_id' => '[\d]+', 'limit' => '[\d]*', 'friend_id' => '[\d]+'],
-        'as' => 'chat'
+        'where' => ['group_id' => '[\d]+', 'limit' => '[\d]*', 'friend_id' => '[\d]+', 'uid' => '[\d]+', 'chat_id' => '[\d]+'],
+        'as' => 'chat',
+        'namespace' => 'Chat'
     ], function ($api) {
         // 群相关路由
-        $api->get('getGroupMessage/{group_id}/{limit?}', 'Chat\ChatGroupMessageController@getGroupMessage')->name('.getGroupMes'); // 通过群ID获取群消息 参数 group_id
-        $api->post('joinGroup', 'Chat\ChatGroupUserController@joinGroup')->name('.joinGroup'); // 登录用户加入群 参数 group_id
-        $api->get('getGroupMember/{group_id}', 'Chat\ChatGroupController@getGroupMember')->name('.getGroupMember'); // 获取群成员 参数 group_id
-        $api->post('createGroup', 'Chat\ChatGroupController@createGroup')->name('.createGroup');
+        $api->get('getGroupMessage/{group_id}/{limit?}', 'ChatGroupMessageController@getGroupMessage')->name('.getGroupMes'); // 通过群ID获取群消息 参数 group_id
+        $api->get('getGroupMember/{group_id}', 'ChatGroupController@getGroupMember')->name('.getGroupMember'); // 获取群成员 参数 group_id
+        $api->post('createGroup', 'ChatGroupController@createGroup')->name('.createGroup');
         // 用户相关路由
-        $api->get('getFriendsList', 'Chat\UserController@getFriendsList')->name('.getFriendsList'); // 获取好友列表 无参数
-        $api->get('isFriends/{friend_id}', 'Chat\ChatUsersController@isFriends')->name('.isFriends'); // 是否是好友 参数 friend_id
-        $api->post('becomeFriends', 'Chat\ChatUsersController@becomeFriends')->name('.becomeFriends'); // 添加好友 参数 friend_id
-        $api->get('getGroupList', 'Chat\UserController@getGroupList')->name('.getGroupList'); // 获取登录用户的群列表 无参数
-        $api->get('getUserChatMessage', 'Chat\ChatUsersMessageController@getUserChatMessage')->name('.getChatMessage'); // 获取登录用户对应好友的消息 参数 friend_id
+        $api->get('getFriendsList', 'UserController@getFriendsList')->name('.getFriendsList'); // 获取好友列表 无参数
+        $api->get('isFriends/{friend_id}', 'ChatUsersController@isFriends')->name('.isFriends'); // 是否是好友 参数 friend_id
+        $api->get('getGroupList', 'UserController@getGroupList')->name('.getGroupList'); // 获取登录用户的群列表 无参数
+
+        $api->get('getChatMessage/chat/{chat_id}/{limit?}', 'ChatUsersMessageController@getChatMessageByChatId')
+            ->name('.getChatMessageByChatId'); // 获取登录用户对应好友的消息 参数 chat_id
+
+        $api->get('getChatMessage/u/{friend_id}/{limit?}', 'ChatUsersMessageController@getChatMessageByUid')
+            ->name('.getChatMessageByUid'); // 获取登录用户对应好友的消息 参数 friend_id
+        $api->get('getUserInfo/{uid}', 'UserController@getUserInfo')->name('.getUserInfo'); // 获取用户信息
+        $api->post('addFriends', 'ChatApplyController@addFriends')->name('.addFriends'); // 添加群或好友 param: friend_id | group_id & remarks
+
+        $api->post('init', 'ChatController@init')->name('.init'); // websocket 初始化 param: connect_id
+        $api->post('chatMessage', 'ChatController@onChatMessage')->name('.chatMessage'); // 对话消息接口 param: chat_id & content
+        $api->post('groupMessage', 'ChatController@onGroupMessage')->name('.groupMessage'); // 群消息接口 param: group_id & content
+        $api->get('connectClose', 'ChatController@onConnectClose')->name('.connectClose'); // websocket断开接口
+        $api->post('resetBadge', 'ChatMessageBadgeController@resetBadge')->name('.resetBadge'); // 重置消息提醒 param:chat_id or group id & is_group
     });
 });

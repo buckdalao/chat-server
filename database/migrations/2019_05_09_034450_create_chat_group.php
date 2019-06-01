@@ -19,6 +19,7 @@ class CreateChatGroup extends Migration
             $table->unsignedTinyInteger('group_status')->default(0)->comment('群状态');
             $table->unsignedInteger('user_id')->default(0)->comment('群主');
             $table->string('photo', 100)->comment('群头像');
+            $table->unsignedInteger('group_number')->comment('群号')->unique();
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at');
         });

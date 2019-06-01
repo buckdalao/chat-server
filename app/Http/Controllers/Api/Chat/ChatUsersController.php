@@ -23,7 +23,7 @@ class ChatUsersController extends Controller
      */
     public function isFriends(Request $request, $friendId)
     {
-        if (empty($request->user()->id) || empty($friendId)) {
+        if (empty($request->user()->id) || empty($friendId) || $request->user()->id == $friendId) {
             return $this->badRequest('Parameter error');
         }
         $res = $this->chatUserRepository->isFriends($request->user()->id, $friendId);

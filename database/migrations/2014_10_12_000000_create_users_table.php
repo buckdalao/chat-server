@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('password',100);
             $table->string('photo',100)->comment('头像路径');
             $table->string('remember_token', 100);
+            $table->unsignedInteger('chat_number')->comment('chat number')->unique();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default('0000-00-00 00:00:00');
         });

@@ -12,11 +12,11 @@ trait JsonResponseTrait
     {
         if (is_array($mess)) {
             $data = $mess;
-            $data['message'] = $mess['message'] ? $mess['message'] : 'success';
+            $data['data'] = $mess['message'] ? $mess['message'] : 'success';
             $data['time'] = time();
             $data['status_code'] = $code;
         } else {
-            $data['message'] = $mess ? $mess : 'success';
+            $data['data'] = $mess ? $mess : 'success';
             $data['time'] = time();
             $data['status_code'] = $code;
         }
@@ -27,11 +27,11 @@ trait JsonResponseTrait
     {
         if (is_array($mess)) {
             $data = $mess;
-            $data['message'] = $mess['message'] ? $mess['message'] : 'failed';
+            $data['data'] = $mess['message'] ? $mess['message'] : 'failed';
             $data['time'] = time();
             $data['status_code'] = $code;
         } else {
-            $data['message'] = $mess ? $mess : 'failed';
+            $data['data'] = $mess ? $mess : 'failed';
             $data['time'] = time();
             $data['status_code'] = $code;
         }
@@ -50,7 +50,7 @@ trait JsonResponseTrait
     public function badRequest($mes = '')
     {
         return response()->json([
-            'message'     => $mes ?: 'Bad Request',
+            'data'     => $mes ?: 'Bad Request',
             'time'        => time(),
             'status_code' => 400
         ], 400);

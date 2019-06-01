@@ -62,7 +62,7 @@ class AuthController extends Controller
      */
     public function me()
     {
-        return response()->json(auth('api')->user());
+        return $this->successWithData(auth('api')->user());
     }
 
     /**
@@ -100,8 +100,7 @@ class AuthController extends Controller
     {
         $users = auth('api')->user()->toArray();
         $users['photo'] = asset($users['photo']);
-        return response()->json([
-            'status_code'  => 200,
+        return $this->successWithData([
             'access_token' => $token,
             'token_type'   => 'Bearer',
             'expires_in'   => auth('api')->factory()->getTTL() * 60,

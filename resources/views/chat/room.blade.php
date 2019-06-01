@@ -98,11 +98,16 @@
     <input type="text" id="msg"><button onclick="sendMsg()">发送</button>
 </div>
 </body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
+<script type="text/javascript" src="http://unpkg.com/iview/dist/iview.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
 </html>
 <script>
     var socket;
     var token;
     var timer;
+    var client_id;
     function connect(){
         token = "bearer " + document.getElementById('token').value
         socket = new WebSocket('ws://reconsitutionfs.com:9526')
@@ -113,11 +118,21 @@
         timer = setInterval(function(){
             socket.send('{"type":"ping"}')
         },1000*25)
+        var config = {
+            timeout: 1000 * 60,
+            headers: {
+                'Accept': 'application/prs.chat.v1+json',
+                'Authorization': token
+            }
+        }
+        setTimeout(() => {
+            axios.post('/api/chat/init', Qs.stringify({
+                connect_id: client_id
+            }),config)
+        }, 3000)
     }
     function onopensocket () {
-        var send = '{"type":"login","uid":"1","token":"'+ token +'"}'
         console.log('连接服务器成功')
-        socket.send(send)
     }
     function onmessage (mes) {
         console.log(mes)
@@ -125,6 +140,9 @@
             return false
         }
         data = evil(mes.data);
+        if (data.type == 3){
+            client_id = data.data
+        }
         if (data.type == 'error') {
             socket.close();
             clearInterval(timer);
@@ -144,7 +162,18 @@
     }
     function sendMsg () {
         token = "bearer " + document.getElementById('token').value
-        socket.send(JSON.stringify({
+        var config = {
+            timeout: 1000 * 60,
+            headers: {
+                'Accept': 'application/prs.chat.v1+json',
+                'Authorization': token
+            }
+        }
+        axios.post('/api/chat/chatMessage', Qs.stringify({
+            chat_id: 1,
+            content: document.getElementById('msg').value
+        }), config);
+        /*socket.send(JSON.stringify({
             type: 'message',
             content: document.getElementById('msg').value,
             group_id: 0,
@@ -153,6 +182,6 @@
             uid: 1,
             user_name: 'buck',
             photo: 'http://reconsitutionfs.com/storage/photos/photo.jpg'
-        }))
+        }))*/
     }
 </script>

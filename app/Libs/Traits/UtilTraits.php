@@ -2,6 +2,7 @@
 
 namespace App\Libs\Traits;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -22,5 +23,21 @@ trait UtilTraits
         } else {
             return false;
         }
+    }
+
+    public function requestIsEmpty(Request $request, array $needParam = [])
+    {
+        $bool = false;
+        $all = $request->all();
+        if (sizeof($all)) {
+            foreach ($all as $key => $val) {
+                if (sizeof($needParam) && in_array($key, $needParam) && empty($val)) {
+                    $bool = true;
+                }
+            }
+        } else {
+            $bool = true;
+        }
+        return $bool;
     }
 }
