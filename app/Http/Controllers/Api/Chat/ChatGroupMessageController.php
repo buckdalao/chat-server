@@ -21,12 +21,12 @@ class ChatGroupMessageController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getCroupMes(Request $request)
+    public function getGroupMessage($groupId, $limit = 50)
     {
-        if (empty($request->get('group_id'))) {
-            return $this->fail('Parameter error');
+        if (empty($groupId) || !is_numeric($limit)) {
+            return $this->badRequest('Parameter error');
         }
-        $res = $this->chatGroupMessageRepository->getCurrentMessage($request->get('group_id'), $request->get('limit') ?: 50);
+        $res = $this->chatGroupMessageRepository->getGroupMessage($groupId, $limit ?: 50);
         return $this->successWithData($res);
     }
 }

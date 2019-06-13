@@ -64,7 +64,7 @@ class WorkermanServer extends Command
         $this->startGateWay();
         $this->startBusinessWorker();
         $this->startRegister();
-        $this->startGlobalData();
+        // $this->startGlobalData(); 关闭服务19.5.14
         Worker::runAll();
     }
 

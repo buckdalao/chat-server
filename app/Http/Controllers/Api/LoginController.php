@@ -3,25 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Libs\Traits\WsMessageTrait;
+use App\Repositories\Chat\ChatApplyRepository;
 use GatewayClient\Gateway;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
     use AuthenticatesUsers, WsMessageTrait;
+
+    protected $chatApplyRepository;
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(ChatApplyRepository $chatApplyRepository)
     {
 //        $this->middleware('jwt.refresh');
 
         Gateway::$registerAddress = env('REGISTER_SERVER');
+
+        $this->chatApplyRepository = $chatApplyRepository;
     }
 
     /**
@@ -77,8 +83,8 @@ class LoginController extends Controller
 
     public function test(Request $request)
     {
-        $this->setUid($request->get('uid'))->setGroupId(1)->message('hello','message')->saveRedis();
-        $response = $this->getMessage();
-        return response()->json($response);
+        Artisan::call('worker', ['action' => 'status']);
+        dd(Artisan::output());
+        return response()->json();
     }
 }

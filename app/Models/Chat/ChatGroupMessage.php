@@ -2,10 +2,13 @@
 
 namespace App\Models\Chat;
 
+use App\Libs\Traits\BaseModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ChatGroupMessage extends Model
 {
+    use BaseModelTrait;
+
     protected $primaryKey = 'group_mes_id';
 
     protected $table = 'chat_group_message';
@@ -33,9 +36,9 @@ class ChatGroupMessage extends Model
     public function saveExpire($json)
     {
         $data = json_decode($json, true);
-        if ($data['uid'] && $data['groupId']) {
+        if ($data['uid'] && $data['group_id']) {
             $this->create([
-                'group_id'  => $data['groupId'],
+                'group_id'  => $data['group_id'],
                 'user_id'   => $data['uid'],
                 'content'   => $data['data'],
                 'send_time' => $data['time'],

@@ -15,12 +15,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('resources/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}/{eight?}/{nine?}', 'Util\ResourceController@getImage')->name('web.getImage');
+Route::get('media/audio/{one?}/{two?}/{three?}/{four?}/{five?}/{six?}/{seven?}/{eight?}/{nine?}', 'Util\ResourceController@getRecorder')->name('web.getRecorder');
 Route::post('auth/login', 'Auth\LoginController@login')->name('auth.login');
-Route::prefix('chat')->namespace('Chat')->group(function (){
-    Route::get('/', 'IndexController@home')->middleware('guest')->name('chat.login');
+Route::prefix('chat')->namespace('Chat')->name('chat.')->group(function (){
+    Route::get('/', 'IndexController@home')->middleware('guest')->name('login');
     Route::group([
-        'middleware' => ['auth']
+        'middleware' => []
     ], function (){
-        Route::get('room', 'RoomController@index')->name('chat.room');
+        Route::get('room', 'RoomController@index')->name('room');
     });
 });

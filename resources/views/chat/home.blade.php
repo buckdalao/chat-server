@@ -103,7 +103,7 @@
                 this.$refs[name].validate((valid) => {
                     if (valid) {
                         this.loading = true;
-                        axios.post('/auth/login', Qs.stringify({
+                        axios.post('api/auth/login', Qs.stringify({
                             email: this.formInline.mail,
                             password: this.formInline.password,
                             is_app: false
@@ -124,7 +124,7 @@
                             this.loading = false
                             this.$Notice.error({
                                 title: '错误提醒',
-                                desc: '请求发生异常'
+                                desc: '验证失败'
                             })
                         })
                     } else {

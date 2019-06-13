@@ -9,6 +9,6 @@ class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        return view('chat.room', ['users' => auth()->user()->toArray()]);
+        return view('chat.room');
     }
 }

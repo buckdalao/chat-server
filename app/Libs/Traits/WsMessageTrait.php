@@ -9,28 +9,33 @@
 namespace App\Libs\Traits;
 
 
+use App\Libs\Upload\UploadFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Redis;
 
 trait WsMessageTrait
 {
-    protected $uid;
-
-    protected $toUid;
+    protected $chatId;
 
     protected $groupId;
 
     protected $mesData;
 
-    protected $saveMax = 5;
+    protected $saveMax = 50;
 
-    protected $mesType = [0 => 'message', 1 => 'notify'];
+    protected $mesType = [
+        0 => 'message',
+        1 => 'notify',
+        2 => 'pong',
+        3 => 'connect',
+        5 => 'error',
+        6 => 'refresh_token',
+        7 => 'audio'
+    ];
 
-    public function setUid($uid, $toUid = 0)
+    public function setChatId($chatId)
     {
-        $this->uid = (int)$uid;
-        if ($toUid) {
-            $this->toUid = (int)$toUid;
-        }
+        $this->chatId = (int)$chatId;
         return $this;
     }
 
@@ -49,17 +54,18 @@ trait WsMessageTrait
         }
     }
 
-    public function message($mes, $type, $disable = true)
+    public function setMessage(array $mes, $disable = false)
     {
         $data = [
-            'type'    => $this->getType($type),
-            'data'    => $mes,
-            'uid'     => $this->uid,
-            'toUid'   => $this->toUid,
-            'groupId' => $this->groupId,
-            'date'    => date('Y-m-d H:i:s'),
-            'time'    => time(),
-            'disable' => $disable
+            'type'      => $mes['type'],
+            'data'      => $mes['data'],
+            'uid'       => (int)$mes['uid'],
+            'user_name' => $mes['user_name'],
+            'chat_id'   => (int)$this->chatId ?: 0,
+            'group_id'  => (int)$this->groupId ?: 0,
+            'time'      => Carbon::now()->timestamp,
+            'disable'   => $disable,
+            'photo'     => $mes['photo']
         ];
         $this->mesData = $data;
         return $this;
@@ -69,13 +75,13 @@ trait WsMessageTrait
     {
         if ($key = $this->getKey()) {
             if ($this->saveMax && Redis::llen($key) >= $this->saveMax) {
-                $overflow = Redis::lpop($key);
-                $expKey = $this->getKey(true);
-                if ($overflow && $expKey) {
-                    Redis::rpush($expKey, $overflow);
-                    if (Redis::ttl($expKey) < 0) {
-                        Redis::expire($expKey, 3600 * 24 * 7);
-                    }
+                Redis::lpop($key);
+            }
+            $expKey = $this->getKey(true);
+            if ($expKey) {
+                Redis::rpush($expKey, json_encode($this->mesData));
+                if (Redis::ttl($expKey) < 0) {
+                    Redis::expire($expKey, 3600 * 24 * 7);
                 }
             }
             Redis::rpush($key, json_encode($this->mesData));
@@ -83,17 +89,14 @@ trait WsMessageTrait
                 Redis::expire($key, $exp);
             }
         }
+        $this->clear();
     }
 
-    public function getKey($isExpire = false)
+    public function getKey($isQueue = false)
     {
-        $exp = $isExpire ? ':exp' : '';
-        if ($this->uid && $this->toUid) {
-            if ($this->uid < $this->toUid) {
-                return 'mes:' . $this->uid . ':and:' . $this->toUid . $exp;
-            } else {
-                return 'mes:' . $this->toUid . ':and:' . $this->uid . $exp;
-            }
+        $exp = $isQueue ? ':queue' : '';
+        if ($this->chatId) {
+            return 'mes:toChat:' . $this->chatId . $exp;
         } elseif ($this->groupId) {
             return 'mes:toGroup:' . $this->groupId . $exp;
         } else {
@@ -106,7 +109,14 @@ trait WsMessageTrait
         $key = $this->getKey();
         $data = [];
         if ($key) {
-            $data = Redis::lrange($key, 0, $len);
+            $mes = Redis::lrange($key, 0, $len);
+            foreach ($mes as $v) {
+                $d = json_decode($v, true);
+                if ($d['type'] == 7 && $d['data']) {
+                    $d['data'] = UploadFactory::mediaUrl($d['data'], 'audio');
+                }
+                $data[] = $d;
+            }
         }
         return $data;
     }
@@ -115,7 +125,7 @@ trait WsMessageTrait
      * @param        $callback   function namespace
      * @param string $key
      */
-    public function saveExpireData($callback, $key = '')
+    public function saveQueueData($callback, $key = '')
     {
         $key = $key ? $key : $this->getKey(true);
         if ($key) {
@@ -128,19 +138,23 @@ trait WsMessageTrait
         }
     }
 
-    public function saveAllExpireData($callback)
+    public function saveAllQueueData($callbackToGroup, $callbackToUser)
     {
-        $allKey = $this->getAllExpireKey();
+        $allKey = $this->getAllQueueKey();
         if (sizeof($allKey)) {
             foreach ($allKey as $key) {
-                $this->saveExpireData($callback, $key);
+                if (preg_match('/toGroup/', $key)) {
+                    $this->saveQueueData($callbackToGroup, $key);
+                } else {
+                    $this->saveQueueData($callbackToUser, $key);
+                }
             }
         }
     }
 
-    public function getAllExpireKey()
+    public function getAllQueueKey()
     {
-        return Redis::keys('mes:*:exp');
+        return Redis::keys('mes:*:queue');
     }
 
     public function getKeySaveCount($key = null)
@@ -162,8 +176,7 @@ trait WsMessageTrait
 
     public function clear()
     {
-        $this->uid = 0;
-        $this->toUid = 0;
+        $this->chatId = 0;
         $this->groupId = 0;
         $this->mesData = [];
     }

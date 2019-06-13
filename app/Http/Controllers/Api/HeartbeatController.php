@@ -11,16 +11,11 @@ class HeartbeatController extends Controller
     //
     public function __construct()
     {
-        Gateway::$registerAddress = env('REGISTER_SERVER');
-    }
-
-    public function getGlobal()
-    {
-        return response()->json($this->registerServer()->getGD(request()->get('key')));
+//        Gateway::$registerAddress = env('REGISTER_SERVER');
     }
 
     public function ping(Request $request)
     {
-        return $this->response->array(['pong' => \request()->get('ping'), 'token' => $request->headers->get('Authorization')]);
+        return $this->successWithData(['pong' => \request()->get('ping'), 'token' => $request->headers->get('Authorization')]);
     }
 }

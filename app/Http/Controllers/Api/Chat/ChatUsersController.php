@@ -15,21 +15,37 @@ class ChatUsersController extends Controller
         $this->chatUserRepository = $chatUsersRepository;
     }
 
-    public function isFriends(Request $request)
+    /**
+     * 是否已建立好友
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function isFriends(Request $request, $friendId)
     {
-        if (empty($request->user()->id) || empty($request->get('friend_id'))) {
-            return $this->fail('Parameter error');
+        if (empty($request->user()->id) || empty($friendId) || $request->user()->id == $friendId) {
+            return $this->badRequest('Parameter error');
         }
-        $res = $this->chatUserRepository->isFriends($request->user()->id, $request->get('friend_id'));
+        $res = $this->chatUserRepository->isFriends($request->user()->id, $friendId);
         return $this->successWithData($res);
     }
 
+    /**
+     * 添加好友
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function becomeFriends(Request $request)
     {
         if (empty($request->user()->id) || empty($request->get('friend_id'))){
-            return $this->fail('Parameter error');
+            return $this->badRequest('Parameter error');
         }
-        $res = $this->chatUserRepository->becomeFriends($request->user()->id, $request->get('friend_id'));
-        return $this->successWithData($res);
+        if ($this->chatUserRepository->isFriends($request->user()->id, $request->get('friend_id')) == false) {
+            $res = $this->chatUserRepository->becomeFriends($request->user()->id, $request->get('friend_id'));
+            return $this->successWithData($res);
+        }else {
+            return $this->badRequest();
+        }
     }
 }

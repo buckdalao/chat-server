@@ -1,6 +1,6 @@
 ## 项目简介
  * 使用Laravel框架结合Workerman搭建的简易消息服务
- 
+
 package|version 
 ---|---
 PHP|>7.1.3
@@ -31,7 +31,12 @@ Workerman|3.5
  php artisan key:generate
  
  php artisan jwt:secret
-
+  
+ php artisan migrate
+ 
+ php artisan db:seed
+ 
+php artisan storage:link  #建立public/storage软链接，homestead需要以管理员身份启动
  ```
  
  * 启动workerman服务
@@ -42,12 +47,14 @@ php artisan worker {start|stop|restart|reload|status} {--d}
 * 开启任务调度
 ```$xslt
    #在crontab 中添加任务
+   
    * * * * * /your_php_install_path/bin/php /your_laravel_project_path/artisan schedule:run >> /dev/null 2>&1
 ```
 
 * artisan快捷命令
 ```$xslt
 # redis消息处理与查询
+
 php artisan message {save|list|ttl} {--key=}
      * action  [
      *         save --- Temporary message overflow saved to database
@@ -59,6 +66,7 @@ php artisan message {save|list|ttl} {--key=}
      
      
 # 创建repository文件
+
 php artisan make:repository exampleRepository --model=User // model可选参数  生成文件在app/Repositories目录
 ```
  

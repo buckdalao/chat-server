@@ -33,7 +33,7 @@ class ChatGroupUserRepository extends EloquentRepository
         $groupInfo = $this->groupModel->where('group_id', '=', (int)$groupId)->first();
         $bool = false;
         if ($userInfo->id && $groupInfo->group_id) {
-            $verifyGroup = $this->where('user_id', '=', $userInfo->id)->where('group_id', '=', $groupId)->first(['group_user_id']);
+            $verifyGroup = $this->isInGroup($userInfo->id, $groupId);
             if (!$verifyGroup) {
                 $this->model->create([
                     'user_id' => $userInfo->id,
@@ -44,5 +44,34 @@ class ChatGroupUserRepository extends EloquentRepository
             }
         }
         return $bool;
+    }
+
+    /**
+     * @param $uid
+     * @param $groupId
+     * @return bool
+     */
+    public function isInGroup($uid, $groupId)
+    {
+        return $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->exists();
+    }
+
+    /**
+     * @param $groupId
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getGroupUserList($groupId)
+    {
+        return $this->model->newQuery()->where('group_id', '=', $groupId)->get();
+    }
+
+    /**
+     * @param $groupId
+     * @param $uid
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getGroupUserInfo($groupId, $uid)
+    {
+        return $this->model->newQuery()->where('group_id', '=', $groupId)->where('user_id', '=', $uid)->first();
     }
 }
