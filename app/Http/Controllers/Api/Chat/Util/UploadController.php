@@ -52,7 +52,7 @@ class UploadController extends Controller
         if ($fid) {
             Gateway::sendToUid([$fid, $uid], $this->message($request, [
                 'type'    => $this->getType('audio'),
-                'data'    => $res->savePath,
+                'data'    => UploadFactory::mediaUrl($res->savePath, 'audio'),
                 'chat_id' => $chatId
             ]));
             if (!Gateway::isUidOnline($fid)) { // 好友不在线做提醒
@@ -84,7 +84,7 @@ class UploadController extends Controller
         $userName = $groupUser->group_user_name ? $groupUser->group_user_name : $request->user()->name;
         Gateway::sendToGroup($groupId, $this->message($request, [
             'type'      => $this->getType('audio'),
-            'data'      => $res->savePath,
+            'data'      => UploadFactory::mediaUrl($res->savePath, 'audio'),
             'group_id'  => $groupId,
             'user_name' => $userName
         ]));
