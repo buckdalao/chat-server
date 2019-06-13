@@ -28,6 +28,12 @@ class Upload
         $this->path = Carbon::now()->toDateString();
         $this->saveFileName = $file->getClientOriginalName();
         $this->dataType = $file->getClientMimeType();
+        if (empty($this->ext)) {
+            $exts = explode('/', $this->dataType);
+            if ($exts[1]) {
+                $this->ext = $exts[1];
+            }
+        }
         return $this;
     }
 
@@ -51,6 +57,9 @@ class Upload
 
     public function save($hex = true)
     {
+        if (empty($this->saveFileName) && empty($this->ext)) {
+            return null;
+        }
         $this->saveFileName = $hex ? Str::uuid()->getHex() . '.' . $this->ext : $this->saveFileName;
         $this->savePath = Storage::disk($this->disk)->putFileAs($this->path, $this->uploadFile, $this->saveFileName);
         return $this->savePath ? $this->info() : null;
