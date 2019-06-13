@@ -4,20 +4,24 @@ namespace App\Http\Controllers\Api\Chat;
 
 use App\Repositories\Chat\ChatApplyRepository;
 use App\Repositories\Chat\ChatGroupUserRepository;
+use App\Repositories\Chat\ChatUsersRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class ChatApplyController extends Controller
 {
     protected $chatGroupUserRepository;
-
     protected $chatApplyRepository;
+    protected $chatUsersRepository;
 
     public function __construct(ChatGroupUserRepository $chatGroupUserRepository,
-                                ChatApplyRepository $applyRepository)
+                                ChatApplyRepository $applyRepository,
+                                ChatUsersRepository $chatUsersRepository)
     {
         $this->chatGroupUserRepository = $chatGroupUserRepository;
         $this->chatApplyRepository = $applyRepository;
+        $this->chatUsersRepository = $chatUsersRepository;
+
     }
 
     /**
@@ -37,8 +41,19 @@ class ChatApplyController extends Controller
 
     public function addFriends(Request $request)
     {
-        if (empty($request->user()->id) || $this->requestIsEmpty($request, ['friend_id', 'group_id'])){
+        if (empty($request->user()->id) || $this->requestIsEmpty($request, ['friend_id', 'group_id'], 'or')){
             return $this->badRequest('Parameter error');
+        }
+        $id = $request->get('friend_id') ?: $request->get('group_id');
+        $isGroup = $request->get('group_id') ? true : false;
+        if (!$isGroup && $this->chatUsersRepository->isFriends($request->user()->id, $id)) {
+            return $this->fail('已是好友');
+        }
+        if ($isGroup && $this->chatGroupUserRepository->isInGroup($request->user()->id, $id)){
+            return $this->fail('已在群中');
+        }
+        if ($this->chatApplyRepository->verify($id, $isGroup, $request->user()->id)) {
+            return $this->fail('已申请过');
         }
         $this->chatApplyRepository->createApply([
             'apply_user_id' => $request->user()->id,

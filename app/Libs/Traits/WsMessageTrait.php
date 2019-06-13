@@ -9,6 +9,7 @@
 namespace App\Libs\Traits;
 
 
+use App\Libs\Upload\UploadFactory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Redis;
 
@@ -22,7 +23,15 @@ trait WsMessageTrait
 
     protected $saveMax = 50;
 
-    protected $mesType = [0 => 'message', 1 => 'notify', 2 => 'pong', 3 => 'connect', 5 => 'error', 6 => 'refresh_token'];
+    protected $mesType = [
+        0 => 'message',
+        1 => 'notify',
+        2 => 'pong',
+        3 => 'connect',
+        5 => 'error',
+        6 => 'refresh_token',
+        7 => 'audio'
+    ];
 
     public function setChatId($chatId)
     {
@@ -102,7 +111,11 @@ trait WsMessageTrait
         if ($key) {
             $mes = Redis::lrange($key, 0, $len);
             foreach ($mes as $v) {
-                $data[] = json_decode($v, true);
+                $d = json_decode($v, true);
+                if ($d['type'] == 7 && $d['data']) {
+                    $d['data'] = UploadFactory::mediaUrl($d['data'], 'audio');
+                }
+                $data[] = $d;
             }
         }
         return $data;

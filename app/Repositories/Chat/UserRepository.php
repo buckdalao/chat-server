@@ -99,4 +99,13 @@ class UserRepository extends EloquentRepository
     {
         return $this->model->newQuery()->whereKey($uid)->first();
     }
+
+    /**
+     * @param $cn
+     * @return \Illuminate\Database\Eloquent\Model|null|object|static
+     */
+    public function getUserByNo($cn)
+    {
+        return $this->model->newQuery()->where('chat_number', '=', $cn)->first();
+    }
 }

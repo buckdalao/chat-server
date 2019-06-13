@@ -10,32 +10,27 @@ trait JsonResponseTrait
 
     public function success($mess = null, $code = Response::HTTP_OK)
     {
-        if (is_array($mess)) {
-            $data = $mess;
-            $data['data'] = $mess['message'] ? $mess['message'] : 'success';
-            $data['time'] = time();
-            $data['status_code'] = $code;
-        } else {
-            $data['data'] = $mess ? $mess : 'success';
-            $data['time'] = time();
-            $data['status_code'] = $code;
-        }
+        $data['data'] = $mess ? $mess : 'success';
+        $data['time'] = time();
+        $data['status_code'] = $code;
         return response()->json($data, $code);
     }
 
-    public function fail($mess = null, $code = Response::HTTP_BAD_GATEWAY)
+    public function fail($mess = null, $code = Response::HTTP_FORBIDDEN)
     {
-        if (is_array($mess)) {
-            $data = $mess;
-            $data['data'] = $mess['message'] ? $mess['message'] : 'failed';
-            $data['time'] = time();
-            $data['status_code'] = $code;
-        } else {
-            $data['data'] = $mess ? $mess : 'failed';
-            $data['time'] = time();
-            $data['status_code'] = $code;
-        }
+        $data['data'] = $mess ? $mess : 'failed';
+        $data['time'] = time();
+        $data['status_code'] = $code;
         return response()->json($data, $code);
+    }
+
+    public function failWithData($data, $code = Response::HTTP_FORBIDDEN)
+    {
+        return response()->json([
+            'data'        => $data,
+            'time'        => time(),
+            'status_code' => $code
+        ], $code);
     }
 
     public function successWithData($data, $code = Response::HTTP_OK)

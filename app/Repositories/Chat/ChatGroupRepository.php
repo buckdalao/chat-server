@@ -44,4 +44,13 @@ class ChatGroupRepository extends EloquentRepository
         }
         return $groupId;
     }
+
+    /**
+     * @param $cn
+     * @return \Illuminate\Database\Eloquent\Model|null|object|static
+     */
+    public function getGroupByNo($cn)
+    {
+        return $this->model->newQuery()->where('group_number', '=', $cn)->first();
+    }
 }

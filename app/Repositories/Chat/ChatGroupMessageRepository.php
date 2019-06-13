@@ -3,6 +3,7 @@
 namespace App\Repositories\Chat;
 
 use App\Libs\Traits\WsMessageTrait;
+use App\Libs\Upload\UploadFactory;
 use App\Models\Chat\ChatGroupMessage;
 use App\Models\Chat\ChatGroupUser;
 use App\Models\Chat\User;
@@ -74,9 +75,12 @@ class ChatGroupMessageRepository extends EloquentRepository
                     'cgu.group_user_name as user_name', 'u.photo'
                 ]);
             if ($mes) {
-                collect($mes)->map(function($item){
+                collect($mes)->map(function ($item) {
                     if ($item->photo) {
                         $item->photo = asset($item->photo);
+                        if ($item->type == 7 && $item->data) {
+                            $item->data = UploadFactory::mediaUrl($item->data, 'audio');
+                        }
                     }
                 });
             }

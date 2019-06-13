@@ -52,11 +52,22 @@ $api->version(['v1'], [
             ->name('.getChatMessageByUid'); // 获取登录用户对应好友的消息 参数 friend_id
         $api->get('getUserInfo/{uid}', 'UserController@getUserInfo')->name('.getUserInfo'); // 获取用户信息
         $api->post('addFriends', 'ChatApplyController@addFriends')->name('.addFriends'); // 添加群或好友 param: friend_id | group_id & remarks
+        $api->post('searchNo', 'ChatToolController@searchNo')->name('.searchNo'); // 搜索好友和群 param: chat_number
 
         $api->post('init', 'ChatController@init')->name('.init'); // websocket 初始化 param: connect_id
         $api->post('chatMessage', 'ChatController@onChatMessage')->name('.chatMessage'); // 对话消息接口 param: chat_id & content
         $api->post('groupMessage', 'ChatController@onGroupMessage')->name('.groupMessage'); // 群消息接口 param: group_id & content
         $api->get('connectClose', 'ChatController@onConnectClose')->name('.connectClose'); // websocket断开接口
         $api->post('resetBadge', 'ChatMessageBadgeController@resetBadge')->name('.resetBadge'); // 重置消息提醒 param:chat_id or group id & is_group
+    });
+    $api->group([
+        'prefix' => 'media',
+        'middleware' => 'auth:api',
+        'where' => ['group_id' => '[\d]+', 'chat_id' => '[\d]+'],
+        'as' => 'chat.resources',
+        'namespace' => 'Chat\Util'
+    ], function ($api) {
+        $api->post('upload/recorder/chat/{chat_id}', 'UploadController@uploadRecorderByChat')->name('.uploadRecorderByChat');
+        $api->post('upload/recorder/group/{group_id}', 'UploadController@uploadRecorderByGroup')->name('.uploadRecorderByGroup');
     });
 });

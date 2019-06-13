@@ -28,7 +28,7 @@ class ChatApplyRepository extends EloquentRepository
                 'apply_user_id' => $data['apply_user_id'],
                 'friend_id'     => $data['friend_id'] ?: 0,
                 'group_id'      => $data['group_id'] ?: 0,
-                'remarks'       => $data['remarks'],
+                'remarks'       => $data['remarks'] ?: '',
                 'apply_status'  => 0,
                 'apply_time'    => time(),
             ]);
@@ -51,5 +51,22 @@ class ChatApplyRepository extends EloquentRepository
             ]);
         }
         return $res;
+    }
+
+    /**
+     * @param $id
+     * @param $isGroup
+     * @param $uid
+     * @return bool
+     */
+    public function verify($id, $isGroup, $uid)
+    {
+        if ($isGroup) {
+            return $this->model->newQuery()->where('group_id', '=', $id)->where('apply_user_id', '=', $uid)
+                ->where('apply_status', '=', 0)->exists();
+        } else {
+            return $this->model->newQuery()->where('friend_id', '=', $id)->where('apply_user_id', '=', $uid)
+                ->where('apply_status', '=', 0)->exists();
+        }
     }
 }

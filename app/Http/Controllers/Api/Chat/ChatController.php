@@ -107,17 +107,20 @@ class ChatController extends Controller
         $content = $request->get('content');
         $uid = $request->user()->id;
         $connectId = Gateway::getClientIdByUid($uid);
+        $groupUser = $this->chatGroupUserRepository->getGroupUserInfo($groupId, $uid);
+        $userName = $groupUser->group_user_name ? $groupUser->group_user_name : $request->user()->name;
         Gateway::sendToGroup($groupId, $this->message($request, [
-            'type'     => $this->getType('message'),
-            'data'     => $content,
-            'group_id' => $groupId,
+            'type'      => $this->getType('message'),
+            'data'      => $content,
+            'group_id'  => $groupId,
+            'user_name' => $userName
         ]), $connectId);
         // 消息缓存
         $this->setGroupId($groupId)->setMessage([
             'type'      => $this->getType('message'),
             'data'      => $content,
             'uid'       => $uid,
-            'user_name' => $request->user()->name,
+            'user_name' => $userName,
             'photo'     => asset($request->user()->photo),
         ])->saveRedis();
         $groupMembers = $this->chatGroupUserRepository->getGroupUserList($groupId);
@@ -167,7 +170,7 @@ class ChatController extends Controller
             $badgeResponse[] = ['id' => $item->group_id, 'is_group' => true, 'count' => $item->count];
         });
         return $this->successWithData([
-            'type' => 'init',
+            'type'       => 'init',
             'badge_list' => $badgeResponse
         ]);
     }

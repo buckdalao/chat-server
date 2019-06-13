@@ -3,6 +3,7 @@
 namespace App\Repositories\Chat;
 
 use App\Libs\Traits\WsMessageTrait;
+use App\Libs\Upload\UploadFactory;
 use App\Models\Chat\ChatUsers;
 use App\Models\Chat\ChatUsersMessage;
 use App\Models\Chat\User;
@@ -66,9 +67,12 @@ class ChatUsersMessageRepository extends EloquentRepository
                     ->get(['cum.user_mes_id', 'cum.chat_id', 'cum.content as data', 'cum.mes_type as type', 'cum.send_time as time',
                         'cum.status', 'cum.user_id as uid', 'cum.to_user_id', 'u.name as user_name', 'u.photo']);
                 if ($mes) {
-                    collect($mes)->map(function($item){
+                    collect($mes)->map(function ($item) {
                         if ($item->photo) {
                             $item->photo = asset($item->photo);
+                        }
+                        if ($item->type == 7 && $item->data) {
+                            $item->data = UploadFactory::mediaUrl($item->data, 'audio');
                         }
                     });
                 }

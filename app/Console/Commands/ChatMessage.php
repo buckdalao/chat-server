@@ -67,7 +67,7 @@ class ChatMessage extends Command
         }
         switch ($action) {
             case 'save':
-                $this->saveAllExpireData([$this->chatCroupMessModel, 'saveExpire'], [$this->chatUserMessRepository, 'saveExpire']);
+                $this->saveAllQueueData([$this->chatCroupMessModel, 'saveExpire'], [$this->chatUserMessRepository, 'saveExpire']);
                 echo "\033[0;32mSave successfully\033[0m" . PHP_EOL;
                 break;
             case 'list':

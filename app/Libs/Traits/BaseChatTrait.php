@@ -31,7 +31,7 @@ trait BaseChatTrait
             'data'       => $mes,
             'time'       => Carbon::now()->timestamp,
             'uid'        => $request->user()->id,
-            'user_name'  => $request->user()->name,
+            'user_name'  => Arr::exists($cont, 'user_name') ? $cont['user_name'] : $request->user()->name,
             'chat_id'    => Arr::exists($cont, 'chat_id') ? (int)$cont['chat_id'] : 0,
             'group_id'   => Arr::exists($cont, 'group_id') ? (int)$cont['group_id'] : 0,
             'token_type' => 'Bearer',

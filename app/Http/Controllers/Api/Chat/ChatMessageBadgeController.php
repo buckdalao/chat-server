@@ -32,7 +32,7 @@ class ChatMessageBadgeController extends Controller
         $uid = $request->user()->id;
         $isGroup = $request->get('is_group');
         $id = $request->get('id');
-        if ($isGroup) {
+        if ($isGroup && $isGroup != 'false') {
             $this->groupMessageBadgeRepository->resetBadge($uid, $id);
         } else {
             $this->chatMessageBadgeRepository->resetBadge($uid, $id);
