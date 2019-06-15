@@ -51,6 +51,9 @@ class Handler
                     $this->pong();
                 }
                 break;
+            default:
+                Gateway::closeCurrentClient('Server Disables Sending Messages');
+                break;
         }
     }
 

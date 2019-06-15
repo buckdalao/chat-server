@@ -2,7 +2,7 @@
  * 使用Laravel框架结合Workerman搭建的简易消息服务
 
 package|version 
----|---
+:---:|:---:
 PHP|>7.1.3
 Laravel|5.7
 Workerman|3.5
