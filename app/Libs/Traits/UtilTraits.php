@@ -60,7 +60,7 @@ trait UtilTraits
     public function isAudio($path)
     {
         $ext = [
-            'wav'
+            'wav', 'mp3'
         ];
         return $this->verifyFile($path, $ext);
     }
