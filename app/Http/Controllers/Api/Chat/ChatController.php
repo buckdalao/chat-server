@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\Chat;
 
 use App\Libs\Traits\BaseChatTrait;
 use App\Libs\Traits\WsMessageTrait;
+use App\Repositories\Chat\ChatApplyRepository;
 use App\Repositories\Chat\ChatGroupMessageBadgeRepository;
 use App\Repositories\Chat\ChatGroupUserRepository;
 use App\Repositories\Chat\ChatMessageBadgeRepository;
 use App\Repositories\Chat\ChatUsersRepository;
+use App\Repositories\Chat\UserNotifyBadgeRepository;
 use App\Repositories\Chat\UserRepository;
 use GatewayClient\Gateway;
 use Illuminate\Http\Request;
@@ -42,11 +44,15 @@ class ChatController extends Controller
      */
     protected $chatGroupUserRepository;
 
+    protected $chatApplyRepository;
+    protected $userNotifyBadgeRepository;
 
     public function __construct(ChatUsersRepository $chatUsersRepository, UserRepository $userRepository,
                                 ChatMessageBadgeRepository $chatMessageBadgeRepository,
                                 ChatGroupMessageBadgeRepository $groupMessageBadgeRepository,
-                                ChatGroupUserRepository $chatGroupUserRepository)
+                                ChatGroupUserRepository $chatGroupUserRepository,
+                                ChatApplyRepository $chatApplyRepository,
+                                UserNotifyBadgeRepository $userNotifyBadgeRepository)
     {
         Gateway::$registerAddress = env('REGISTER_SERVER');
         $this->chatUsersRepository = $chatUsersRepository;
@@ -54,6 +60,8 @@ class ChatController extends Controller
         $this->chatMessageBadgeRepository = $chatMessageBadgeRepository;
         $this->groupMessageBadgeRepository = $groupMessageBadgeRepository;
         $this->chatGroupUserRepository = $chatGroupUserRepository;
+        $this->chatApplyRepository = $chatApplyRepository;
+        $this->userNotifyBadgeRepository = $userNotifyBadgeRepository;
     }
 
     /**
@@ -78,7 +86,7 @@ class ChatController extends Controller
                 'chat_id' => $chatId
             ]));
             if (!Gateway::isUidOnline($fid)) { // 好友不在线做提醒
-                $this->chatMessageBadgeRepository->setBadge($fid, $chatId);
+                $this->chatMessageBadgeRepository->upBadge($fid, $chatId);
             }
             // 消息缓存
             $this->setChatId($chatId)->setMessage([
@@ -127,7 +135,7 @@ class ChatController extends Controller
         if ($groupMembers) {
             collect($groupMembers)->each(function ($member) {
                 if ($member->user_id && !Gateway::isUidOnline($member->user_id)) { // 群内不在线的用户做消息提醒
-                    $this->groupMessageBadgeRepository->setBadge($member->user_id, $member->group_id);
+                    $this->groupMessageBadgeRepository->upBadge($member->user_id, $member->group_id);
                 }
             });
         }
@@ -169,9 +177,13 @@ class ChatController extends Controller
         collect($groupBadge)->each(function ($item) use (&$badgeResponse) {
             $badgeResponse[] = ['id' => $item->group_id, 'is_group' => true, 'count' => $item->count];
         });
+        $applyNotify = $this->chatApplyRepository->getNotifyByUid($uid);
+        $notifyCount = $this->userNotifyBadgeRepository->getBadgeByUid($uid);
         return $this->successWithData([
-            'type'       => 'init',
-            'badge_list' => $badgeResponse
+            'type'               => 'init',
+            'badge_list'         => $badgeResponse,
+            'apply_notify'       => $applyNotify,
+            'apply_notify_badge' => $notifyCount
         ]);
     }
 
@@ -223,5 +235,25 @@ class ChatController extends Controller
             }
             Gateway::sendToUid($userIds, $notifyMes);
         }
+    }
+
+    public function saveWebsiteBadge(Request $request)
+    {
+        if (empty($request->get('badge'))) {
+            return $this->badRequest();
+        }
+        $uid = $request->user()->id;
+        $badgeList = $request->get('badge');
+        if (sizeof($badgeList)) {
+            foreach ($badgeList as $badge) {
+                if ((int)$badge['count'] > 0 && ($badge['is_group'] == false || $badge['is_group'] == 'false')) {
+                    $this->chatMessageBadgeRepository->setBadgeCount($uid, (int)$badge['id'], $badge['count']);
+                }
+                if ((int)$badge['count'] > 0 && ($badge['is_group'] == true || $badge['is_group'] == 'true')) {
+                    $this->groupMessageBadgeRepository->setBadgeCount($uid, (int)$badge['id'], $badge['count']);
+                }
+            }
+        }
+        return $this->success();
     }
 }

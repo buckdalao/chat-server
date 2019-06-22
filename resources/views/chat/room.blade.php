@@ -94,7 +94,7 @@
             <a href="https://github.com/laravel/laravel">GitHub</a>
         </div>
     </div>
-    <input type="text" id="token"><button onclick="connect()">连接</button><br>
+    <input type="text" id="token" placeholder="token"><input type="text" id="key" placeholder="key"><button onclick="connect()">连接</button><br>
     <input type="text" id="msg"><button onclick="sendMsg()">发送</button>
 </div>
 </body>
@@ -109,7 +109,6 @@
     var timer;
     var client_id;
     function connect(){
-        token = "bearer " + document.getElementById('token').value
         socket = new WebSocket('ws://reconsitutionfs.com:9526')
         socket.onopen = onopensocket
         socket.onmessage = onmessage
@@ -118,11 +117,14 @@
         timer = setInterval(function(){
             socket.send('{"type":"ping"}')
         },1000*25)
+        var token = "bearer " + document.getElementById('token').value
+        var key = document.getElementById('key').value
         var config = {
             timeout: 1000 * 60,
             headers: {
                 'Accept': 'application/prs.chat.v1+json',
-                'Authorization': token
+                'Authorization': token,
+                'Custom-Token': key
             }
         }
         setTimeout(() => {
@@ -161,12 +163,14 @@
         console.log('服务器连接已断开，定时重连......')
     }
     function sendMsg () {
-        token = "bearer " + document.getElementById('token').value
+        var token = "bearer " + document.getElementById('token').value
+        var key = document.getElementById('key').value
         var config = {
             timeout: 1000 * 60,
             headers: {
                 'Accept': 'application/prs.chat.v1+json',
-                'Authorization': token
+                'Authorization': token,
+                'Custom-Token': key
             }
         }
         axios.post('/api/chat/chatMessage', Qs.stringify({

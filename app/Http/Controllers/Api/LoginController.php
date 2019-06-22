@@ -8,6 +8,7 @@ use GatewayClient\Gateway;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 
@@ -83,8 +84,11 @@ class LoginController extends Controller
 
     public function test(Request $request)
     {
-        Artisan::call('worker', ['action' => 'status']);
-        dd(Artisan::output());
+        /* $exp = auth('api')->getPayload()->get('exp');
+        $exp = date('Y-m-d H:i:s', $exp); */
+        $res = app('App\Repositories\Chat\ChatApplyRepository')->getNotify(1);
+        dd($res->toArray());
+        echo date('Y-m-d H:i:s');
         return response()->json();
     }
 }

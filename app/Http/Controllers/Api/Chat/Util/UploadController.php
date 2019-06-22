@@ -56,7 +56,7 @@ class UploadController extends Controller
                 'chat_id' => $chatId
             ]));
             if (!Gateway::isUidOnline($fid)) { // 好友不在线做提醒
-                $this->chatMessageBadgeRepository->setBadge($fid, $chatId);
+                $this->chatMessageBadgeRepository->upBadge($fid, $chatId);
             }
             // 消息缓存
             $this->setChatId($chatId)->setMessage([
@@ -100,7 +100,7 @@ class UploadController extends Controller
         if ($groupMembers) {
             collect($groupMembers)->each(function ($member) {
                 if ($member->user_id && !Gateway::isUidOnline($member->user_id)) { // 群内不在线的用户做消息提醒
-                    $this->groupMessageBadgeRepository->setBadge($member->user_id, $member->group_id);
+                    $this->groupMessageBadgeRepository->upBadge($member->user_id, $member->group_id);
                 }
             });
         }

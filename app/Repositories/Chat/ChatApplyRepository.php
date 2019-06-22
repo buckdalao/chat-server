@@ -3,14 +3,21 @@
 namespace App\Repositories\Chat;
 
 use App\Models\Chat\ChatApply;
+use App\Models\Chat\ChatGroup;
+use App\Models\Chat\User;
 use App\Repositories\EloquentRepository;
 
 class ChatApplyRepository extends EloquentRepository
 {
 
-    public function __construct(ChatApply $model)
+    protected $user;
+    protected $group;
+
+    public function __construct(ChatApply $model, User $user, ChatGroup $group)
     {
         $this->model = $model;
+        $this->user = $user;
+        $this->group = $group;
     }
 
     /**
@@ -68,5 +75,41 @@ class ChatApplyRepository extends EloquentRepository
             return $this->model->newQuery()->where('friend_id', '=', $id)->where('apply_user_id', '=', $uid)
                 ->where('apply_status', '=', 0)->exists();
         }
+    }
+
+    public function getNotifyByUid($uid)
+    {
+        $users = $this->model->newQuery()->from($this->model->alias('ca'))
+            ->leftJoin($this->user->alias('u'), 'ca.apply_user_id', '=', 'u.id')
+            ->leftJoin($this->group->alias('g'), 'ca.group_id', '=', 'g.group_id')
+            ->where('ca.friend_id', '=', $uid)->orWhere('g.user_id', '=', $uid)
+            ->orderBy('ca.id', 'asc')
+            ->get([
+                'u.id as uid', 'u.name as user_name', 'ca.apply_time', 'ca.remarks', 'u.photo', 'u.chat_number', 'ca.group_id', 'ca.id', 'ca.apply_status'
+                ]);
+        if ($users) {
+            collect($users)->map(function ($item) {
+                if ($item->photo) {
+                    $item->photo = asset($item->photo);
+                }
+            });
+        }
+        return $users;
+    }
+
+    public function getApplyInfoById($applyId)
+    {
+        return $this->model->newQuery()->whereKey($applyId)->first();
+    }
+
+    /**
+     * 是否已审核
+     *
+     * @param $applyId
+     * @return bool
+     */
+    public function hasBeenAudit($applyId)
+    {
+        return $this->model->newQuery()->whereKey($applyId)->where('apply_status', '>', 0)->exists();
     }
 }

@@ -30,7 +30,9 @@ trait WsMessageTrait
         3 => 'connect',
         5 => 'error',
         6 => 'refresh_token',
-        7 => 'audio'
+        7 => 'audio',
+        8 => 'apply_notify',
+        9 => 'release_friend_list'
     ];
 
     public function setChatId($chatId)

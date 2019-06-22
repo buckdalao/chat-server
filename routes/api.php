@@ -13,7 +13,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version(['v1'], [
     'namespace'  => 'App\Http\Controllers\Api',
-    'middleware' => ['api', 'api.throttle'],
+    'middleware' => ['api', 'api.throttle', 'clientAuth'],
     'as' => 'api'
 ], function ($api) {
     $api->group(['prefix' => 'auth', 'as' => 'auth'], function ($api) {
@@ -32,7 +32,7 @@ $api->version(['v1'], [
     $api->group([
         'prefix' => 'chat',
         'middleware' => 'auth:api',
-        'where' => ['group_id' => '[\d]+', 'limit' => '[\d]*', 'friend_id' => '[\d]+', 'uid' => '[\d]+', 'chat_id' => '[\d]+'],
+        'where' => ['group_id' => '[\d]+', 'limit' => '[\d]*', 'friend_id' => '[\d]+', 'uid' => '[\d]+', 'chat_id' => '[\d]+', 'apply_id' => '[\d]+'],
         'as' => 'chat',
         'namespace' => 'Chat'
     ], function ($api) {
@@ -41,9 +41,9 @@ $api->version(['v1'], [
         $api->get('getGroupMember/{group_id}', 'ChatGroupController@getGroupMember')->name('.getGroupMember'); // 获取群成员 参数 group_id
         $api->post('createGroup', 'ChatGroupController@createGroup')->name('.createGroup');
         // 用户相关路由
-        $api->get('getFriendsList', 'UserController@getFriendsList')->name('.getFriendsList'); // 获取好友列表 无参数
+        $api->get('friendsList/get', 'UserController@getFriendsList')->name('.getFriendsList'); // 获取好友列表 无参数
         $api->get('isFriends/{friend_id}', 'ChatUsersController@isFriends')->name('.isFriends'); // 是否是好友 参数 friend_id
-        $api->get('getGroupList', 'UserController@getGroupList')->name('.getGroupList'); // 获取登录用户的群列表 无参数
+        $api->get('groupList/get', 'UserController@getGroupList')->name('.getGroupList'); // 获取登录用户的群列表 无参数
 
         $api->get('getChatMessage/chat/{chat_id}/{limit?}', 'ChatUsersMessageController@getChatMessageByChatId')
             ->name('.getChatMessageByChatId'); // 获取登录用户对应好友的消息 参数 chat_id
@@ -53,6 +53,9 @@ $api->version(['v1'], [
         $api->get('getUserInfo/{uid}', 'UserController@getUserInfo')->name('.getUserInfo'); // 获取用户信息
         $api->post('addFriends', 'ChatApplyController@addFriends')->name('.addFriends'); // 添加群或好友 param: friend_id | group_id & remarks
         $api->post('searchNo', 'ChatToolController@searchNo')->name('.searchNo'); // 搜索好友和群 param: chat_number
+        $api->post('apply/audit/{apply_id}', 'ChatApplyController@audit')->name('.applyFriendAudit'); // 加群加好友审核 param: audit
+        $api->get('apply/get', 'ChatApplyController@getApplyList')->name('.getApplyList'); // 获取好友和群申请列表 无参数
+        $api->get('apply/notify/reset', 'ChatApplyController@resetNotifyBadge')->name('.resetNotifyBadge'); // 重置申请的消息提醒  无参数
 
         $api->post('init', 'ChatController@init')->name('.init'); // websocket 初始化 param: connect_id
         $api->post('chatMessage', 'ChatController@onChatMessage')->name('.chatMessage'); // 对话消息接口 param: chat_id & content

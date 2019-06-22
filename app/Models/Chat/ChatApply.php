@@ -2,10 +2,13 @@
 
 namespace App\Models\Chat;
 
+use App\Libs\Traits\BaseModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ChatApply extends Model
 {
+    use BaseModelTrait;
+
     protected $table = 'chat_apply';
 
     protected $primaryKey = 'id';

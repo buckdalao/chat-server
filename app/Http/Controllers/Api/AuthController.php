@@ -70,8 +70,22 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout()
+    public function logout(Request $request)
     {
+        if ($request->get('badge')) {
+            $uid = $request->user()->id;
+            $badgeList = $request->get('badge');
+            if (sizeof($badgeList)) {
+                foreach ($badgeList as $badge) {
+                    if ((int)$badge['count'] > 0 && ($badge['is_group'] == false || $badge['is_group'] == 'false')) {
+                        app('App\Repositories\Chat\ChatMessageBadgeRepository')->setBadgeCount($uid, (int)$badge['id'], $badge['count']);
+                    }
+                    if ((int)$badge['count'] > 0 && ($badge['is_group'] == true || $badge['is_group'] == 'true')) {
+                        app('App\Repositories\Chat\ChatGroupMessageBadgeRepository')->setBadgeCount($uid, (int)$badge['id'], $badge['count']);
+                    }
+                }
+            }
+        }
         auth('api')->logout();
 
         return $this->success('Successfully logged out');

@@ -14,7 +14,7 @@ class ChatMessageBadgeRepository  extends EloquentRepository
         $this->model = $model;
     }
 
-    public function setBadge($uid, $chatId)
+    public function upBadge($uid, $chatId)
     {
         if (empty($uid) || empty($chatId)) {
             return ;
@@ -49,5 +49,12 @@ class ChatMessageBadgeRepository  extends EloquentRepository
         if ($uid) {
             return $badge = $this->model->newQuery()->where('user_id', '=', $uid)->get(['chat_id', 'count']);
         }
+    }
+
+    public function setBadgeCount($uid, $chatId, $count)
+    {
+        $this->model->newQuery()->where('user_id', '=', $uid)->where('chat_id', '=', $chatId)->update([
+            'count' => (int)$count
+        ]);
     }
 }

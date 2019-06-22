@@ -82,7 +82,8 @@ class Handler
             return true;
         }
         try {
-            $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', $token)->post('lib/ping', ['ping' => 1]);
+            $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', $token)
+                ->header('Custom-Token', env('CLIENT_KEY'))->post('lib/ping', ['ping' => 1]);
             $response = $response['data'];
             if (is_array($response)) {
                 $explode = explode(' ', $token);
@@ -97,7 +98,7 @@ class Handler
                 $this->response = $exception->getResponse();
             }
             if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
-                $this->response = ['message' => 'Unauthorized', 'status_code' => 401, 'time' => time(), 'sign' => 'AuthenticationException'];
+                $this->response = ['data' => 'Unauthorized', 'status_code' => 401, 'time' => time(), 'sign' => 'AuthenticationException'];
             }
             $bool = false;
         }

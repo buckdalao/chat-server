@@ -18,7 +18,7 @@ class ChatGroupMessageBadgeRepository  extends EloquentRepository
      * @param $uid
      * @param $groupId
      */
-    public function setBadge($uid, $groupId)
+    public function upBadge($uid, $groupId)
     {
         if (empty($uid) || empty($groupId)) {
             return ;
@@ -56,6 +56,13 @@ class ChatGroupMessageBadgeRepository  extends EloquentRepository
     {
         $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->update([
             'count' => 0
+        ]);
+    }
+
+    public function setBadgeCount($uid, $groupId, $count)
+    {
+        $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->update([
+            'count' => (int)$count
         ]);
     }
 }
