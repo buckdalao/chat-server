@@ -108,4 +108,14 @@ class UserRepository extends EloquentRepository
     {
         return $this->model->newQuery()->where('chat_number', '=', $cn)->first();
     }
+
+    public function getUserByEmail($email)
+    {
+        return $this->model->newQuery()->where('email', '=', $email)->first();
+    }
+
+    public function getUserByPhone($phone)
+    {
+        return $this->model->newQuery()->where('phone', '=', $phone)->first();
+    }
 }

@@ -106,4 +106,14 @@ class UploadController extends Controller
         }
         return $this->success();
     }
+
+    public function imgToBase64(Request $request)
+    {
+        Validator::make($request->all(), [
+            'img' => 'required|image'
+        ])->validate();
+        $path = $request->file('img')->getPathname();
+        $base64 = $this->base64EncodeImage($path);
+        return $this->successWithData($base64);
+    }
 }

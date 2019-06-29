@@ -88,4 +88,15 @@ trait UtilTraits
         }
         return $collect;
     }
+
+    public function base64EncodeImage($filePath)
+    {
+        $imgInfo = getimagesize($filePath);
+        $imgData = file_get_contents($filePath);
+        if ($imgInfo['mime'] && $imgData) {
+            return 'data:' . $imgInfo['mime'] . ';base64,' . base64_encode($imgData);
+        } else {
+            return null;
+        }
+    }
 }

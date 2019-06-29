@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Libs\Traits\BaseChatTrait;
+use App\Libs\Traits\WsMessageTrait;
 use App\Repositories\Chat\UserRepository;
 use GatewayClient\Gateway;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    use WsMessageTrait, BaseChatTrait;
     protected $userRepository;
 
     /**
@@ -62,7 +67,9 @@ class AuthController extends Controller
      */
     public function me()
     {
-        return $this->successWithData(auth('api')->user());
+        $user = auth('api')->user()->toArray();
+        $user['photo'] = asset($user['photo']);
+        return $this->successWithData($user);
     }
 
     /**
@@ -122,5 +129,69 @@ class AuthController extends Controller
             'friend_list'  => $friendsList,
             'group_list'   => $groupList,
         ]);
+    }
+
+    /**
+     * 修改个人信息
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateInformation(Request $request)
+    {
+        Validator::make($request->all(), [
+            'name'     => ['required', 'string', 'max:12'],
+            'email'    => ['required', 'string', 'email'],
+            'phone' => ['required', 'string', 'min:8'],
+        ])->validate();
+        $uid = $request->user()->id;
+        if ($request->get('email') != $request->user()->email) {
+            $emailUser = $this->userRepository->getUserByEmail($request->get('email'));
+            if ($emailUser) {
+                return $this->badRequest();
+            }
+        }
+        if ($request->get('phone') != $request->user()->phone) {
+            $phoneUser = $this->userRepository->getUserByPhone($request->get('phone'));
+            if ($phoneUser) {
+                return $this->badRequest();
+            }
+        }
+        $this->userRepository->update($uid, $request->all());
+        $friendsList = $this->userRepository->friendsListDetailed(auth('api')->user()->id);
+        if ($friendsList) {
+            foreach ($friendsList as $value) {
+                // 通知在线好友更新好友列表
+                if ($value['id'] && Gateway::isUidOnline($value['id'])) {
+                    Gateway::sendToUid($value['id'], $this->message($request, [
+                        'type' => $this->getType('release_friend_list'),
+                        'data' => 0
+                    ]));
+                }
+            }
+        }
+        return $this->success();
+    }
+
+    public function changePassword(Request $request)
+    {
+        Validator::make($request->all(), [
+            'old_password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password_confirmation' => ['required', 'string', 'min:6'],
+        ])->validate();
+        $password = Hash::make($request->get('password'));
+        $uid = $request->user()->id;
+        $userInfo = $this->userRepository->getUserById($uid);
+        if (!Hash::check($request->get('old_password'), $userInfo->password)) {
+            return $this->badRequest('Primitive password error');
+        }
+        if (Hash::check($request->get('password'), $userInfo->password)) {
+            return $this->badRequest('The new password cannot be the same as the old one');
+        }
+        $this->userRepository->update($uid, [
+            'password' => $password
+        ]);
+        return $this->success();
     }
 }

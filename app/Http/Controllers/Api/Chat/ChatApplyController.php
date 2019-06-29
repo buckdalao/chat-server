@@ -128,7 +128,7 @@ class ChatApplyController extends Controller
                 $this->chatUsersRepository->becomeFriends($applyInfo->apply_user_id, $applyInfo->friend_id);
                 $friendsList = $this->userRepository->friendsListDetailed($request->user()->id);
             }
-            // 如果申请人在线  提醒申请人更新好友列表
+            // 如果申请人在线  提醒申请人更新好友列表 或者群列表
             if (Gateway::isUidOnline($applyInfo->apply_user_id)) {
                 Gateway::sendToUid($applyInfo->apply_user_id, $this->message($request, [
                     'type' => $this->getType('release_friend_list'),

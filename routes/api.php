@@ -23,6 +23,10 @@ $api->version(['v1'], [
         $api->post('logout', 'AuthController@logout')->name('.logout');
         $api->post('refresh', 'AuthController@refresh')->name('.refresh');
         $api->post('me', 'AuthController@me')->name('.me');
+        // 更新用户信息 param: email name phone
+        $api->post('information/update', 'AuthController@updateInformation')->middleware('auth:api')->name('.updateInformation');
+        // 修改密码 param: old_password & password & password_confirmation
+        $api->post('password/change', 'AuthController@changePassword')->middleware('auth:api')->name('.changePassword');
     });
     $api->group(['prefix' => 'lib', 'as' => 'lib'], function ($api) {
         $api->post('test', 'LoginController@test')->name('.test'); // 调试路由
@@ -72,5 +76,6 @@ $api->version(['v1'], [
     ], function ($api) {
         $api->post('upload/recorder/chat/{chat_id}', 'UploadController@uploadRecorderByChat')->name('.uploadRecorderByChat');
         $api->post('upload/recorder/group/{group_id}', 'UploadController@uploadRecorderByGroup')->name('.uploadRecorderByGroup');
+        $api->post('upload/imgToBase64', 'UploadController@imgToBase64')->name('.imgToBase64');
     });
 });
