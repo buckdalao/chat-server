@@ -25,7 +25,7 @@ class Upload
         $this->uploadFile = $file;
         $this->fileName = $file->getFilename();
         $this->ext = $file->getClientOriginalExtension();
-        $this->path = Carbon::now()->toDateString();
+        $this->path = dechex(rand(0, 15)) . dechex(rand(0, 15));
         $this->saveFileName = $file->getClientOriginalName();
         $this->dataType = $file->getClientMimeType();
         if (empty($this->ext)) {
@@ -68,19 +68,27 @@ class Upload
     public function info()
     {
         $res = [
-            'fileName'     => $this->fileName,
-            'ext'          => $this->ext,
-            'savePath'     => $this->savePath,
-            'disk'         => $this->disk,
-            'size'         => Storage::disk($this->disk)->size($this->savePath),
+            'fileName' => $this->fileName,
+            'ext' => $this->ext,
+            'savePath' => $this->savePath,
+            'disk' => $this->disk,
+            'size' => Storage::disk($this->disk)->size($this->savePath),
             'saveFileName' => $this->saveFileName,
-            'dataType'     => $this->dataType,
+            'dataType' => $this->dataType,
         ];
         return (object)$res;
     }
 
     public function mediaUrl($path, $type)
     {
-        return Storage::disk($this->disk)->url($type . '/' .$path);
+        return Storage::disk($this->disk)->url($type . '/' . $path);
+    }
+
+    public function delete($path)
+    {
+        $exists = Storage::disk($this->disk)->exists($path);
+        if ($exists) {
+            Storage::disk($this->disk)->delete($path);
+        }
     }
 }

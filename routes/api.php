@@ -76,6 +76,8 @@ $api->version(['v1'], [
     ], function ($api) {
         $api->post('upload/recorder/chat/{chat_id}', 'UploadController@uploadRecorderByChat')->name('.uploadRecorderByChat');
         $api->post('upload/recorder/group/{group_id}', 'UploadController@uploadRecorderByGroup')->name('.uploadRecorderByGroup');
-        $api->post('upload/imgToBase64', 'UploadController@imgToBase64')->name('.imgToBase64');
+        $api->post('upload/imgToBase64', 'UploadController@imgToBase64')->name('.imgToBase64'); // 修改头像 param: img
+        $api->post('upload/avatar/delete', 'UploadController@deleteTempAvatar')->name('.deleteTempAvatar'); // 删除修改头像的临时文件 param: img_path
+        $api->post('upload/avatar/save', 'UploadController@saveTempAvatar')->name('.saveTempAvatar'); // 确认修改头像 param: img_path
     });
 });

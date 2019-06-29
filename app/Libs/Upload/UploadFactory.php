@@ -21,4 +21,9 @@ class UploadFactory
     {
         return app(Upload::class)->mediaUrl($path, $routePrefix);
     }
+
+    public static function delete($path)
+    {
+        return app(Upload::class)->delete($path);
+    }
 }
