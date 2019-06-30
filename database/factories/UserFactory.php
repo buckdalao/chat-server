@@ -17,12 +17,13 @@ use Faker\Generator as Faker;
 $factory->define(App\Models\Chat\User::class, function (Faker $faker) {
     return [
         'name' => $faker->name,
-        'email' => $faker->unique()->safeEmail,
+        'email' => '704927525@qq.com',
         'email_verified_at' => now(),
         'password' => \Illuminate\Support\Facades\Hash::make('123123'), // secret
         'remember_token' => Str::random(10),
         'mb_prefix' => '+86',
-        'phone' => $faker->phoneNumber,
-        'photo' => 'storage/photos/photo.jpg'
+        'phone' => 13026161010,
+        'photo' => 'storage/photos/photo.jpg',
+        'chat_number' => 1000001
     ];
 });

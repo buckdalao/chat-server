@@ -3,6 +3,7 @@
 namespace App\Libs\Traits;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,17 @@ trait UtilTraits
         $bool = false;
         $all = $request->all();
         if (sizeof($all)) {
+            $num = 0;
+            foreach ($needParam as $v) {
+                if (!Arr::exists($all, $v) && (empty($operator) || strtolower($operator) == 'and')) {
+                    return true;
+                } else {
+                    $num++;
+                }
+            }
+            if ($num == 0 && strtolower($operator) == 'or') {
+                return true;
+            }
             foreach ($all as $key => $val) {
                 if (strtolower($operator) == 'or' && in_array($key, $needParam) && !empty($key)) {
                     break;
@@ -60,7 +72,7 @@ trait UtilTraits
     public function isAudio($path)
     {
         $ext = [
-            'wav'
+            'wav', 'mp3'
         ];
         return $this->verifyFile($path, $ext);
     }
@@ -75,5 +87,16 @@ trait UtilTraits
             });
         }
         return $collect;
+    }
+
+    public function base64EncodeImage($filePath)
+    {
+        $imgInfo = getimagesize($filePath);
+        $imgData = file_get_contents($filePath);
+        if ($imgInfo['mime'] && $imgData) {
+            return 'data:' . $imgInfo['mime'] . ';base64,' . base64_encode($imgData);
+        } else {
+            return null;
+        }
     }
 }

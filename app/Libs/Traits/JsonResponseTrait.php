@@ -47,8 +47,8 @@ trait JsonResponseTrait
         return response()->json([
             'data'     => $mes ?: 'Bad Request',
             'time'        => time(),
-            'status_code' => 400
-        ], 400);
+            'status_code' => Response::HTTP_BAD_REQUEST
+        ], Response::HTTP_BAD_REQUEST);
     }
 
 }

@@ -53,4 +53,20 @@ class ChatGroupRepository extends EloquentRepository
     {
         return $this->model->newQuery()->where('group_number', '=', $cn)->first();
     }
+
+    /**
+     * 获取群的群主uid
+     *
+     * @param $groupId
+     * @return int|mixed
+     */
+    public function getGroupOwnerUid($groupId)
+    {
+        $uid = 0;
+        $res = $this->model->newQuery()->whereKey($groupId)->first(['user_id']);
+        if ($res) {
+            $uid = $res->user_id;
+        }
+        return $uid;
+    }
 }

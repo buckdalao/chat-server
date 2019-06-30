@@ -68,4 +68,14 @@ class User extends BaseUser
     {
         return $this->hasMany('App\Models\Chat\ChatGroupMessageBadge', 'user_id', 'id');
     }
+
+    /**
+     * 用户通知提醒个数
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function userNotifyBadge()
+    {
+        return $this->hasMany('App\Models\Chat\UserNotifyBadge', 'user_id', 'id');
+    }
 }

@@ -23,7 +23,7 @@ class ChatUsersRepository extends EloquentRepository
     public function becomeFriends($uid, $fid)
     {
         $bool = false;
-        if ($uid && $fid) {
+        if ($uid && $fid && !$this->isFriends($uid, $fid)) {
             $bool = $this->model->newQuery()->insert([
                 'user_id_1' => $uid < $fid ? $uid : $fid,
                 'user_id_2' => $uid > $fid ? $uid : $fid,

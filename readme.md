@@ -2,7 +2,7 @@
  * 使用Laravel框架结合Workerman搭建的简易消息服务
 
 package|version 
----|---
+:---:|:---:
 PHP|>7.1.3
 Laravel|5.7
 Workerman|3.5
@@ -68,6 +68,12 @@ php artisan message {save|list|ttl} {--key=}
 # 创建repository文件
 
 php artisan make:repository exampleRepository --model=User // model可选参数  生成文件在app/Repositories目录
+
+# 获取client key
+
+get key : php artisan client:key get --key=expire time (int) // 将返回的key值加入到.env CLIENT_KEY
+delete key : php artisan client:key del --key=client key (string)
+get key expire time: php artisan client:key ttl --key=client key (string)
 ```
  
 
