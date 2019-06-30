@@ -157,9 +157,26 @@ class UploadController extends Controller
             'img_path' => 'required|string'
         ])->validate();
         $uid = $request->user()->id;
+        $photo = $request->user()->photo;
         $this->userRepository->update($uid, [
             'photo' => 'storage/' . $request->get('img_path')
         ]);
+        if ($photo != 'storage/photos/photo.jpg') {
+            $path = str_replace('storage/', '', $photo);
+            UploadFactory::setDisk('public')->delete($path);
+        }
+        $friendsList = $this->userRepository->friendsListDetailed($uid);
+        if ($friendsList) {
+            foreach ($friendsList as $value) {
+                // 通知在线好友更新好友列表
+                if ($value['id'] && Gateway::isUidOnline($value['id'])) {
+                    Gateway::sendToUid($value['id'], $this->message($request, [
+                        'type' => $this->getType('release_friend_list'),
+                        'data' => 0
+                    ]));
+                }
+            }
+        }
         return $this->success();
     }
 }
