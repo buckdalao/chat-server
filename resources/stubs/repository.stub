@@ -2,7 +2,7 @@
 
 namespace RepositoryNamespace;
 
-use App\Models\ModelName;
+use App\Models\DummyNamespace;
 use App\Repositories\EloquentRepository;
 
 class DummyClass  extends EloquentRepository
