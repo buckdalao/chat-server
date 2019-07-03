@@ -59,10 +59,10 @@ class RepositoryMakeCommand extends GeneratorCommand
      */
     protected function replaceNamespace(&$stub, $name)
     {
-
+        $modelName = explode('/', $this->setModel());
         $stub = str_replace(
-            ['RepositoryNamespace', 'ModelName'],
-            [$this->getNamespace($name), $this->setModel()],
+            ['RepositoryNamespace', 'DummyNamespace', 'ModelName'],
+            [$this->getNamespace($name), str_replace('/', '\\', $this->setModel()), $modelName[count($modelName) - 1]],
             $stub
         );
 
