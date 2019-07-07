@@ -129,7 +129,7 @@ class UploadController extends Controller
         $base64 = $this->base64EncodeImage($path);
         return $this->successWithData([
             'img_url' => $base64,
-            'img_path' => $res ? $res->savePath : ''
+            'img_path' => isset($res) ? $res->savePath : ''
         ]);
     }
 
