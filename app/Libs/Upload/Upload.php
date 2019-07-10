@@ -19,6 +19,7 @@ class Upload
     protected $disk = 'media';
     protected $savePath;
     protected $saveFileName;
+    protected $saveFileSource;
 
     public function setFile(UploadedFile $file)
     {
@@ -32,6 +33,23 @@ class Upload
             $exts = explode('/', $this->dataType);
             if ($exts[1]) {
                 $this->ext = $exts[1];
+            }
+        }
+        return $this;
+    }
+
+    public function setBase64($base64)
+    {
+        $base64Regexp = '/^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&\',()*+;=\-._~:@\/?%\s]*?)\s*$/i';
+        if (preg_match($base64Regexp, $base64, $res)) {
+            if ($res[1] && $res[4]) {
+                $this->dataType = $res[1];
+                $exts = explode('/', $this->dataType);
+                if ($exts[1]) {
+                    $this->ext = $exts[1];
+                }
+                $this->saveFileSource = base64_decode($res[4]);
+                $this->saveFileName = Str::uuid()->getHex() . '.' . $this->ext;
             }
         }
         return $this;
@@ -61,7 +79,12 @@ class Upload
             return null;
         }
         $this->saveFileName = $hex ? Str::uuid()->getHex() . '.' . $this->ext : $this->saveFileName;
-        $this->savePath = Storage::disk($this->disk)->putFileAs($this->path, $this->uploadFile, $this->saveFileName);
+        if ($this->saveFileSource) {
+            Storage::disk($this->disk)->put($this->path . '/' . $this->saveFileName, $this->saveFileSource);
+            $this->savePath = $this->path . '/' . $this->saveFileName;
+        } elseif ($this->uploadFile) {
+            $this->savePath = Storage::disk($this->disk)->putFileAs($this->path, $this->uploadFile, $this->saveFileName);
+        }
         return $this->savePath ? $this->info() : null;
     }
 

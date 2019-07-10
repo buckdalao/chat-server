@@ -6,7 +6,7 @@ use App\Models\Chat\ChatGroupMessageBadge;
 use App\Repositories\EloquentRepository;
 use Illuminate\Support\Facades\DB;
 
-class ChatGroupMessageBadgeRepository  extends EloquentRepository
+class ChatGroupMessageBadgeRepository extends EloquentRepository
 {
 
     public function __construct(ChatGroupMessageBadge $model)
@@ -18,21 +18,21 @@ class ChatGroupMessageBadgeRepository  extends EloquentRepository
      * @param $uid
      * @param $groupId
      */
-    public function upBadge($uid, $groupId)
+    public function upBadge($uid, $groupId, $qty = 1)
     {
         if (empty($uid) || empty($groupId)) {
-            return ;
+            return;
         }
         $badge = $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->first(['id', 'count']);
         if ($badge && $badge->id) {
             $this->model->newQuery()->whereKey($badge->id)->update([
-                'count' => DB::raw('count + 1')
+                'count' => DB::raw('count + ' . $qty)
             ]);
         } else {
             $this->model->newQuery()->insert([
-                'user_id' => $uid,
+                'user_id'  => $uid,
                 'group_id' => $groupId,
-                'count' => 1
+                'count'    => $qty
             ]);
         }
     }
@@ -61,8 +61,17 @@ class ChatGroupMessageBadgeRepository  extends EloquentRepository
 
     public function setBadgeCount($uid, $groupId, $count)
     {
-        $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->update([
-            'count' => (int)$count
-        ]);
+        if ($this->issetBadge($uid, $groupId)) {
+            $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->update([
+                'count' => (int)$count
+            ]);
+        } else {
+            $this->upBadge($uid, $groupId, $count);
+        }
+    }
+
+    public function issetBadge($uid, $groupId)
+    {
+        return $this->model->newQuery()->where('user_id', '=', $uid)->where('group_id', '=', $groupId)->exists();
     }
 }

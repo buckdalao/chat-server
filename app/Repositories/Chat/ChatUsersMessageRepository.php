@@ -74,6 +74,9 @@ class ChatUsersMessageRepository extends EloquentRepository
                         if ($item->type == 7 && $item->data) {
                             $item->data = UploadFactory::mediaUrl($item->data, 'audio');
                         }
+                        if ($item->type == 4 && $item->data) {
+                            $item->data = asset($item->data);
+                        }
                     });
                 }
             }

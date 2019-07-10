@@ -127,9 +127,15 @@ class UploadController extends Controller
             }
         }
         $base64 = $this->base64EncodeImage($path);
+        $imgInfo = getimagesize($path);
         return $this->successWithData([
             'img_url' => $base64,
-            'img_path' => isset($res) ? $res->savePath : ''
+            'img_path' => isset($res) ? $res->savePath : '',
+            'img_info' => [
+                'width' => $imgInfo[0],
+                'height' => $imgInfo[1],
+                'mime' => $imgInfo['mime']
+            ]
         ]);
     }
 

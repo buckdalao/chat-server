@@ -127,10 +127,22 @@
                 'Custom-Token': key
             }
         }
+        if (!token || !key) {
+            clearInterval(timer)
+            timer = null
+            socket.close()
+            return false;
+        }
         setTimeout(() => {
             axios.post('/api/chat/init', Qs.stringify({
                 connect_id: client_id
-            }),config)
+            }),config).then((r) => {
+                console.log(r)
+            }).catch((e) => {
+                clearInterval(timer)
+                timer = null
+                socket.close()
+            })
         }, 3000)
     }
     function onopensocket () {

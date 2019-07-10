@@ -14,7 +14,7 @@ class ChatMessageBadgeRepository  extends EloquentRepository
         $this->model = $model;
     }
 
-    public function upBadge($uid, $chatId)
+    public function upBadge($uid, $chatId, $qty = 1)
     {
         if (empty($uid) || empty($chatId)) {
             return ;
@@ -22,13 +22,13 @@ class ChatMessageBadgeRepository  extends EloquentRepository
         $badge = $this->model->newQuery()->where('user_id', '=', $uid)->where('chat_id', '=', $chatId)->first(['id', 'count']);
         if ($badge && $badge->id) {
             $this->model->newQuery()->whereKey($badge->id)->update([
-                'count' => DB::raw('count + 1')
+                'count' => DB::raw('count + ' . $qty)
             ]);
         } else {
             $this->model->newQuery()->insert([
                 'user_id' => $uid,
                 'chat_id' => $chatId,
-                'count' => 1
+                'count' => $qty
             ]);
         }
     }
@@ -53,8 +53,17 @@ class ChatMessageBadgeRepository  extends EloquentRepository
 
     public function setBadgeCount($uid, $chatId, $count)
     {
-        $this->model->newQuery()->where('user_id', '=', $uid)->where('chat_id', '=', $chatId)->update([
-            'count' => (int)$count
-        ]);
+        if ($this->issetBadge($uid, $chatId)) {
+            $this->model->newQuery()->where('user_id', '=', $uid)->where('chat_id', '=', $chatId)->update([
+                'count' => (int)$count
+            ]);
+        } else {
+            $this->upBadge($uid, $chatId, $count);
+        }
+    }
+
+    public function issetBadge($uid, $chatId)
+    {
+        return $this->model->newQuery()->where('user_id', '=', $uid)->where('chat_id', '=', $chatId)->exists();
     }
 }
