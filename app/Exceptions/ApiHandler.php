@@ -12,7 +12,7 @@ class ApiHandler extends DingoHandler
     public function handle(Exception $exception)
     {
         if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
-            return response()->json(['message' => 'Unauthorized', 'status_code' => Response::HTTP_UNAUTHORIZED, 'time' => time()],
+            return response()->json(['message' => __('auth.error.unauthorized'), 'status_code' => Response::HTTP_UNAUTHORIZED, 'time' => time()],
                 Response::HTTP_UNAUTHORIZED);
         }
         if ($exception instanceof ValidationException) {
@@ -28,6 +28,6 @@ class ApiHandler extends DingoHandler
             $mes = $v[0];
             break;
         }
-        return $mes ? $mes : 'The given data was invalid.';
+        return $mes ? $mes : __('the given data was invalid');
     }
 }

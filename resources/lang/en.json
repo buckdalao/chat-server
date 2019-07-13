@@ -1,0 +1,21 @@
+{
+  "join success": "Join the success",
+  "join fail": "Join the failure",
+  "bad request": "Bad Request",
+  "parameter error": "Parameter error",
+  "is already a friendship": "It's already a friendship",
+  "is already the group": "It's already in this group",
+  "application has been sent": "An application has been sent",
+  "application sent": "Application sent",
+  "the approved": "The approved",
+  "the account has been logged in elsewhere": "The account has been logged in elsewhere",
+  "number is wrong": "Number is wrong",
+  "successfully logged out": "Successfully logged out",
+  "this mailbox is not registered": "This mailbox is not registered",
+  "please check whether the email and password are correct": "Please check whether the email and password are correct",
+  "primitive password error": "Primitive password error",
+  "the new password cannot be the same as the old one": "The new password cannot be the same as the old one",
+  "unexpected mistakes occur": "Unexpected mistakes occur",
+  "the client is not authorized": "The client is not authorized",
+  "the given data was invalid": "The given data was invalid."
+}

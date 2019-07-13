@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 
-class EnableCrossRequestMiddleware
+class EnableCrossRequest
 {
     /**
      * Handle an incoming request.

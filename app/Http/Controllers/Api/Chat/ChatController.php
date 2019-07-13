@@ -227,7 +227,7 @@ class ChatController extends Controller
         $uid = $request->user()->id;
         $connectId = $request->get('connect_id');
         if (Gateway::isUidOnline($uid)) {
-            return $this->fail('该账号已在别处登录');
+            return $this->fail(__('the account has been logged in elsewhere'));
         }
         Gateway::bindUid($connectId, $uid);
         $groupList = $this->userRepository->groupList($uid);

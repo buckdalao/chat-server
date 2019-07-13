@@ -28,7 +28,7 @@ class UserController extends Controller
     public function getFriendsList(Request $request)
     {
         if (empty($request->user()->id)) {
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         $res = $this->userRepository->friendsListDetailed($request->user()->id);
         return $this->successWithData($res);

@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         //
         Commands\WorkermanServer::class,
-        Commands\RepositoryMakeCommand::class,
+        Commands\RepositoryMake::class,
         Commands\ChatMessage::class
     ];
 

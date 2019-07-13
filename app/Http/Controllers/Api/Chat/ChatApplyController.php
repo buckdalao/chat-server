@@ -50,27 +50,27 @@ class ChatApplyController extends Controller
     public function joinGroup(Request $request)
     {
         if (empty($request->user()->id) || empty($request->get('group_id'))){
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         $res = $this->chatGroupUserRepository->joinGroup($request->user(), $request->get('group_id'));
-        return $res ? $this->success('加入成功') : $this->fail('加入失败');
+        return $res ? $this->success(__('join success')) : $this->fail(__('join fail'));
     }
 
     public function addFriends(Request $request)
     {
         if (empty($request->user()->id) || $this->requestIsEmpty($request, ['friend_id', 'group_id'], 'or')){
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         $id = $request->get('friend_id') ?: $request->get('group_id');
         $isGroup = $request->get('group_id') ? true : false;
         if (!$isGroup && $this->chatUsersRepository->isFriends($request->user()->id, $id)) {
-            return $this->fail('已是好友');
+            return $this->fail(__('is already a friendship'));
         }
         if ($isGroup && $this->chatGroupUserRepository->isInGroup($request->user()->id, $id)){
-            return $this->fail('已在群中');
+            return $this->fail(__('is already the group'));
         }
         if ($this->chatApplyRepository->verify($id, $isGroup, $request->user()->id)) {
-            return $this->fail('已申请过');
+            return $this->fail(__('application has been sent'));
         }
         $this->chatApplyRepository->createApply([
             'apply_user_id' => $request->user()->id,
@@ -100,7 +100,7 @@ class ChatApplyController extends Controller
                 $this->userNotifyBadgeRepository->setBadge($request->get('friend_id'));
             }
         }
-        return $this->success('申请已发送');
+        return $this->success(__('application sent'));
     }
 
     /**
@@ -113,10 +113,10 @@ class ChatApplyController extends Controller
     public function audit(Request $request, $applyId)
     {
         if (empty($request->user()->id) || empty($applyId) || $this->requestIsEmpty($request, ['audit'])){
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         if ($this->chatApplyRepository->hasBeenAudit($applyId)) {
-            return $this->fail('已审核');
+            return $this->fail(__('the approved'));
         }
         $this->chatApplyRepository->auditApply($applyId, $request->get('audit'));
         $applyInfo = $this->chatApplyRepository->getApplyInfoById($applyId);

@@ -1,0 +1,21 @@
+{
+  "join success": "加入成功",
+  "join fail": "加入失败",
+  "bad request": "请求失败",
+  "parameter error": "参数错误",
+  "is already a friendship": "你们已经是好友",
+  "is already the group": "您已经在这个群里",
+  "application has been sent": "您已经申请过了",
+  "application sent": "申请已发送",
+  "the approved": "已审核",
+  "the account has been logged in elsewhere": "该账号已在别处登录",
+  "number is wrong": "号码错误",
+  "successfully logged out": "退出成功",
+  "this mailbox is not registered": "该邮箱未注册",
+  "please check whether the email and password are correct": "请检查密码邮箱是否正确",
+  "primitive password error": "原始密码错误",
+  "the new password cannot be the same as the old one": "新密码不能和原密码相同",
+  "unexpected mistakes occur": "发送意料之外的错误",
+  "the client is not authorized": "客户端未获得授权",
+  "the given data was invalid": "提交的数据不可用"
+}

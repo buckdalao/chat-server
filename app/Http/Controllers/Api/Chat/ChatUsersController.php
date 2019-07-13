@@ -24,7 +24,7 @@ class ChatUsersController extends Controller
     public function isFriends(Request $request, $friendId)
     {
         if (empty($request->user()->id) || empty($friendId) || $request->user()->id == $friendId) {
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         $res = $this->chatUserRepository->isFriends($request->user()->id, $friendId);
         return $this->successWithData($res);
@@ -39,7 +39,7 @@ class ChatUsersController extends Controller
     public function becomeFriends(Request $request)
     {
         if (empty($request->user()->id) || empty($request->get('friend_id'))){
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         if ($this->chatUserRepository->isFriends($request->user()->id, $request->get('friend_id')) == false) {
             $res = $this->chatUserRepository->becomeFriends($request->user()->id, $request->get('friend_id'));
