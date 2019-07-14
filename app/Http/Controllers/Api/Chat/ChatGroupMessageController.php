@@ -24,7 +24,7 @@ class ChatGroupMessageController extends Controller
     public function getGroupMessage($groupId, $limit = 50)
     {
         if (empty($groupId) || !is_numeric($limit)) {
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         $res = $this->chatGroupMessageRepository->getGroupMessage($groupId, $limit ?: 50);
         return $this->successWithData($res);

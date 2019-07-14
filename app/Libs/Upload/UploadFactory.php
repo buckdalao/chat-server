@@ -26,4 +26,9 @@ class UploadFactory
     {
         return app(Upload::class)->delete($path);
     }
+
+    public static function putBase64Str($str)
+    {
+        return app(Upload::class)->setBase64($str);
+    }
 }

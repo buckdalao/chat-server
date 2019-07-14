@@ -26,7 +26,7 @@ class RefreshToken extends BaseMiddleware
             if (!$user) {
                 return response()->json([
                     'status_code' => 401,
-                    'data'        => '未查询到该用户信息',
+                    'data'        => __('auth.error.login_expired'),
                     'time'        => time(),
                 ], 401);
             }
@@ -46,14 +46,14 @@ class RefreshToken extends BaseMiddleware
                 // 过期用户
                 return response()->json([
                     'status_code' => 401,
-                    'data'        => '账号信息过期了，请重新登录',
+                    'data'        => __('auth.error.login_expired'),
                     'error'       => $e->getMessage(),
                     'time'        => time(),
                 ], 401);
             } catch (\Exception $exception) {
                 return response()->json([
                     'status_code' => 500,
-                    'data'        => '发生异常',
+                    'data'        => __('unexpected mistakes occur'),
                     'error'       => $exception->getMessage(),
                     'time'        => time(),
                 ], 500);
@@ -61,14 +61,14 @@ class RefreshToken extends BaseMiddleware
         } catch (JWTException $e) {
             return response()->json([
                 'status_code' => 401,
-                'data'        => '登录信息已过期，请重新登录.',
+                'data'        => __('auth.error.login_expired'),
                 'error'       => $e->getMessage(),
                 'time'        => time(),
             ], 401);
         } catch (\Exception $exception) {
             return response()->json([
                 'status_code' => 500,
-                'data'        => '发生异常',
+                'data'        => __('unexpected mistakes occur'),
                 'error'       => $exception->getMessage(),
                 'time'        => time(),
             ], 500);

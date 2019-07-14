@@ -2,12 +2,14 @@
 
 namespace App\Repositories\Chat;
 
+use App\Libs\ArrayPaginator;
 use App\Libs\Traits\WsMessageTrait;
 use App\Libs\Upload\UploadFactory;
 use App\Models\Chat\ChatGroupMessage;
 use App\Models\Chat\ChatGroupUser;
 use App\Models\Chat\User;
 use App\Repositories\EloquentRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Redis;
 
 class ChatGroupMessageRepository extends EloquentRepository
@@ -61,6 +63,8 @@ class ChatGroupMessageRepository extends EloquentRepository
     {
         $mes = $this->setGroupId($groupID)->getMessage();
         if (sizeof($mes)) {
+            $class = new ArrayPaginator();
+            $mes = $class->setArray($mes)->paginate($limit);
             return $mes;
         } else {
             $mes = $this->model->newQuery()->from($this->model->alias('cgm'))
@@ -70,16 +74,19 @@ class ChatGroupMessageRepository extends EloquentRepository
                 ->leftJoin($this->user->alias('u'), function ($join) {
                     $join->on('cgm.user_id', '=', 'u.id');
                 })
-                ->where('cgm.group_id', $groupID)->orderBy($this->model->getKeyName(), 'asc')->limit($limit ?: 50)->get([
+                ->where('cgm.group_id', $groupID)->orderBy($this->model->getKeyName(), 'asc')->select([
                     'cgm.group_mes_id', 'cgm.group_id', 'cgm.content as data', 'cgm.send_time as time', 'cgm.mes_type as type', 'cgm.user_id as uid', 'cgm.status',
                     'cgu.group_user_name as user_name', 'u.photo'
-                ]);
+                ])->paginate($limit);
             if ($mes) {
-                collect($mes)->map(function ($item) {
+                collect($mes->items())->map(function ($item) {
                     if ($item->photo) {
                         $item->photo = asset($item->photo);
                         if ($item->type == 7 && $item->data) {
                             $item->data = UploadFactory::mediaUrl($item->data, 'audio');
+                        }
+                        if ($item->type == 4 && $item->data) {
+                            $item->data = asset($item->data);
                         }
                     }
                 });

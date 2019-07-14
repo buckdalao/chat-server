@@ -47,13 +47,13 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
         $res = DB::table('users')->select(['id'])->where(['email' => \request()->get('email')])->first();
         if (empty($res->id)) {
-            return $this->fail('该邮箱未注册', 401);
+            return $this->fail(__('this mailbox is not registered'), 401);
         }
         if (Gateway::isUidOnline($res->id)) {
-            return $this->fail('该账号已在别处登录', 401);
+            return $this->fail(__('the account has been logged in elsewhere'), 401);
         }
         if (!$token = auth('api')->attempt($credentials)) {
-            return $this->fail('请检查邮箱和密码是否正确', 401);
+            return $this->fail(__('please check whether the email and password are correct'), 401);
         }
         $friendsList = $this->userRepository->friendsListDetailed(auth('api')->user()->id);
         $groupList = $this->userRepository->groupList(auth('api')->user()->id);
@@ -84,10 +84,10 @@ class AuthController extends Controller
             $badgeList = $request->get('badge');
             if (sizeof($badgeList)) {
                 foreach ($badgeList as $badge) {
-                    if ((int)$badge['count'] > 0 && ($badge['is_group'] == false || $badge['is_group'] == 'false')) {
+                    if ((int)$badge['count'] > 0 && ($badge['is_group'] === false || $badge['is_group'] == 'false')) {
                         app('App\Repositories\Chat\ChatMessageBadgeRepository')->setBadgeCount($uid, (int)$badge['id'], $badge['count']);
                     }
-                    if ((int)$badge['count'] > 0 && ($badge['is_group'] == true || $badge['is_group'] == 'true')) {
+                    if ((int)$badge['count'] > 0 && ($badge['is_group'] === true || $badge['is_group'] == 'true')) {
                         app('App\Repositories\Chat\ChatGroupMessageBadgeRepository')->setBadgeCount($uid, (int)$badge['id'], $badge['count']);
                     }
                 }
@@ -95,7 +95,7 @@ class AuthController extends Controller
         }
         auth('api')->logout();
 
-        return $this->success('Successfully logged out');
+        return $this->success(__('successfully logged out'));
     }
 
     /**
@@ -184,10 +184,10 @@ class AuthController extends Controller
         $uid = $request->user()->id;
         $userInfo = $this->userRepository->getUserById($uid);
         if (!Hash::check($request->get('old_password'), $userInfo->password)) {
-            return $this->badRequest('Primitive password error');
+            return $this->badRequest(__('primitive password error'));
         }
         if (Hash::check($request->get('password'), $userInfo->password)) {
-            return $this->badRequest('The new password cannot be the same as the old one');
+            return $this->badRequest(__('the new password cannot be the same as the old one'));
         }
         $this->userRepository->update($uid, [
             'password' => $password

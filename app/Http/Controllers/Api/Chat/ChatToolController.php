@@ -30,15 +30,9 @@ class ChatToolController extends Controller
 
     public function searchNo(Request $request)
     {
-        $fails = Validator::make($request->all(), [
+        Validator::make($request->all(), [
             'chat_number' => ['required', 'numeric', 'min:100000', 'max:9999999']
-        ], [
-            'required' => 'The :attribute field is required.',
-            'numeric'    => 'The :attribute must be numeric.',
-        ])->errors()->getMessages();
-        if ($fails) {
-            return $this->fail($fails['chat_number'][0]);
-        }
+        ])->validate();
         $cn = $request->get('chat_number');
         $uid = $request->user()->id;
         $data = $this->userRepository->getUserByNo($cn);
@@ -56,7 +50,7 @@ class ChatToolController extends Controller
             $res['is_group'] = $isGroup;
             return $this->successWithData($res);
         } else {
-            return $this->fail('号码错误');
+            return $this->fail(__('number is wrong'));
         }
     }
 }

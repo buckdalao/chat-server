@@ -20,7 +20,9 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
         // 设置跨域
-        \App\Http\Middleware\EnableCrossRequestMiddleware::class,
+        \App\Http\Middleware\EnableCrossRequest::class,
+        // 设置语言
+        \App\Http\Middleware\SetLanguage::class,
     ];
 
     /**
@@ -63,8 +65,8 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // token刷新
-        'refreshToken' => \App\Http\Middleware\RefreshToken::class,
-        'clientAuth' => \App\Http\Middleware\ClientAuthenticate::class,
+        'refresh.token' => \App\Http\Middleware\RefreshToken::class,
+        'client.auth' => \App\Http\Middleware\ClientAuthenticate::class,
     ];
 
     /**

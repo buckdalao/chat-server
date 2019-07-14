@@ -24,7 +24,7 @@ class ChatGroupController extends Controller
     public function getGroupMember($groupId)
     {
         if (empty($groupId)) {
-            return $this->badRequest('Parameter error');
+            return $this->badRequest(__('parameter error'));
         }
         $members = $this->chatGroupRepository->getGroupUser($groupId);
         return $this->successWithData($members);

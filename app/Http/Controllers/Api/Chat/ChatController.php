@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Chat;
 
 use App\Libs\Traits\BaseChatTrait;
 use App\Libs\Traits\WsMessageTrait;
+use App\Libs\Upload\UploadFactory;
 use App\Repositories\Chat\ChatApplyRepository;
 use App\Repositories\Chat\ChatGroupMessageBadgeRepository;
 use App\Repositories\Chat\ChatGroupUserRepository;
@@ -14,6 +15,7 @@ use App\Repositories\Chat\UserRepository;
 use GatewayClient\Gateway;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class ChatController extends Controller
 {
@@ -72,15 +74,47 @@ class ChatController extends Controller
      */
     public function onChatMessage(Request $request)
     {
-        if ($this->requestIsEmpty($request, ['chat_id', 'content']) || empty($request->user()->id)) {
-            return $this->badRequest();
-        }
+        Validator::make($request->all(), [
+            'content' => 'required|string',
+            'chat_id' => 'required|integer'
+        ])->validate();
         $chatId = $request->get('chat_id');
         $content = $request->get('content');
+        $base64Img = $request->get('base64_img');
         $uid = $request->user()->id;
         $fid = $this->chatUsersRepository->getFriendIdByChatId($uid, $chatId);
         if ($fid) {
-            Gateway::sendToUid($fid, $this->message($request, [
+            if ($base64Img) {
+                foreach ($base64Img as $value) {
+                    $saveInfo = UploadFactory::putBase64Str($value)->setDisk('public')->setPath('messages/img/' . dechex(rand(0, 15)) . dechex(rand(0, 15)))->save();
+                    if ($saveInfo) {
+                        $url = asset('storage/'.$saveInfo->savePath);
+                        Gateway::sendToUid([$fid, $uid], $this->message($request, [
+                            'type'    => $this->getType('img'),
+                            'data'    => $url,
+                            'chat_id' => $chatId
+                        ]));
+                        if (!Gateway::isUidOnline($fid)) { // 好友不在线做提醒
+                            $this->chatMessageBadgeRepository->upBadge($fid, $chatId);
+                        }
+                        // 消息缓存
+                        $this->setChatId($chatId)->setMessage([
+                            'type'      => $this->getType('img'),
+                            'data'      => 'storage/'.$saveInfo->savePath,
+                            'uid'       => $uid,
+                            'user_name' => $request->user()->name,
+                            'photo'     => asset($request->user()->photo),
+                        ])->saveRedis();
+                    }
+                }
+                $content = preg_replace('/<img(\s*)[a-zA-Z0-9.+-="\'\s\/;:,_@]*>/i', '', $content);
+                $content = strip_tags($content);
+                if (empty($content) && $base64Img) {
+                    return $this->success();
+                }
+            }
+            $sendUser = $base64Img ? [$fid, $uid] : $fid;
+            Gateway::sendToUid($sendUser, $this->message($request, [
                 'type'    => $this->getType('message'),
                 'data'    => $content,
                 'chat_id' => $chatId
@@ -108,21 +142,58 @@ class ChatController extends Controller
      */
     public function onGroupMessage(Request $request)
     {
-        if ($this->requestIsEmpty($request, ['group_id', 'content']) || empty($request->user()->id)) {
-            return $this->badRequest();
-        }
+        Validator::make($request->all(), [
+            'content' => 'required|string',
+            'group_id' => 'required|integer'
+        ])->validate();
+        $base64Img = $request->get('base64_img');
         $groupId = $request->get('group_id');
         $content = $request->get('content');
         $uid = $request->user()->id;
         $connectId = Gateway::getClientIdByUid($uid);
         $groupUser = $this->chatGroupUserRepository->getGroupUserInfo($groupId, $uid);
         $userName = $groupUser->group_user_name ? $groupUser->group_user_name : $request->user()->name;
+        if ($base64Img) {
+            foreach ($base64Img as $value) {
+                $saveInfo = UploadFactory::putBase64Str($value)->setDisk('public')->setPath('messages/img/' . dechex(rand(0, 15)) . dechex(rand(0, 15)))->save();
+                if ($saveInfo) {
+                    $url = asset('storage/'.$saveInfo->savePath);
+                    Gateway::sendToGroup($groupId, $this->message($request, [
+                        'type'      => $this->getType('img'),
+                        'data'      => $url,
+                        'group_id'  => $groupId,
+                        'user_name' => $userName
+                    ]));
+                    // 消息缓存
+                    $this->setGroupId($groupId)->setMessage([
+                        'type'      => $this->getType('img'),
+                        'data'      => 'storage/'.$saveInfo->savePath,
+                        'uid'       => $uid,
+                        'user_name' => $userName,
+                        'photo'     => asset($request->user()->photo),
+                    ])->saveRedis();
+                    $groupMembers = $this->chatGroupUserRepository->getGroupUserList($groupId);
+                    if ($groupMembers) {
+                        collect($groupMembers)->each(function ($member) {
+                            if ($member->user_id && !Gateway::isUidOnline($member->user_id)) { // 群内不在线的用户做消息提醒
+                                $this->groupMessageBadgeRepository->upBadge($member->user_id, $member->group_id);
+                            }
+                        });
+                    }
+                }
+            }
+            $content = preg_replace('/<img(\s*)[a-zA-Z0-9.+-="\'\s\/;:,_@]*>/i', '', $content);
+            $content = strip_tags($content);
+            if (empty($content) && $base64Img) {
+                return $this->success();
+            }
+        }
         Gateway::sendToGroup($groupId, $this->message($request, [
             'type'      => $this->getType('message'),
             'data'      => $content,
             'group_id'  => $groupId,
             'user_name' => $userName
-        ]), $connectId);
+        ]), $base64Img ? null : $connectId);
         // 消息缓存
         $this->setGroupId($groupId)->setMessage([
             'type'      => $this->getType('message'),
@@ -156,7 +227,7 @@ class ChatController extends Controller
         $uid = $request->user()->id;
         $connectId = $request->get('connect_id');
         if (Gateway::isUidOnline($uid)) {
-            return $this->fail('该账号已在别处登录');
+            return $this->fail(__('the account has been logged in elsewhere'));
         }
         Gateway::bindUid($connectId, $uid);
         $groupList = $this->userRepository->groupList($uid);

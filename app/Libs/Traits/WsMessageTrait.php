@@ -28,6 +28,7 @@ trait WsMessageTrait
         1 => 'notify',
         2 => 'pong',
         3 => 'connect',
+        4 => 'img',
         5 => 'error',
         6 => 'refresh_token',
         7 => 'audio',
@@ -116,6 +117,9 @@ trait WsMessageTrait
                 $d = json_decode($v, true);
                 if ($d['type'] == 7 && $d['data']) {
                     $d['data'] = UploadFactory::mediaUrl($d['data'], 'audio');
+                }
+                if ($d['type'] == 4 && $d['data']) {
+                    $d['data'] = asset($d['data']);
                 }
                 $data[] = $d;
             }

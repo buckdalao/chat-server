@@ -48,8 +48,8 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:6'],
             'phone' => ['required', 'string', 'min:8', 'unique:users'],
         ], [
-            'email.unique' => '该邮箱已注册',
-            'phone.unique' => '该手机号已注册',
+            'email.unique' => __('auth.email_registered'),
+            'phone.unique' => __('auth.phone_has_been_registered'),
         ]);
     }
 

@@ -116,17 +116,26 @@ class UploadController extends Controller
     public function imgToBase64(Request $request)
     {
         Validator::make($request->all(), [
-            'img' => 'required|image'
+            'img' => 'required|image',
+            'is_save' => 'required|integer'
         ])->validate();
         $path = $request->file('img')->getPathname();
-        $res = UploadFactory::putFile($request->file('img'))->setDisk('public')->setPath('photos/' . dechex(rand(0, 15)) . dechex(rand(0, 15)))->save();
-        if (empty($res)) {
-            return $this->fail('image save failed');
+        if ($request->get('is_save') == 1) {
+            $res = UploadFactory::putFile($request->file('img'))->setDisk('public')->setPath('photos/' . dechex(rand(0, 15)) . dechex(rand(0, 15)))->save();
+            if (empty($res)) {
+                return $this->fail('image save failed');
+            }
         }
         $base64 = $this->base64EncodeImage($path);
+        $imgInfo = getimagesize($path);
         return $this->successWithData([
             'img_url' => $base64,
-            'img_path' => $res->savePath
+            'img_path' => isset($res) ? $res->savePath : '',
+            'img_info' => [
+                'width' => $imgInfo[0],
+                'height' => $imgInfo[1],
+                'mime' => $imgInfo['mime']
+            ]
         ]);
     }
 

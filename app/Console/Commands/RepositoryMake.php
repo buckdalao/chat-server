@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
-class RepositoryMakeCommand extends GeneratorCommand
+class RepositoryMake extends GeneratorCommand
 {
     /**
      * The name and signature of the console command.

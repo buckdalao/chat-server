@@ -18,7 +18,7 @@ class ClientAuthenticate
         if (!app('App\Repositories\Tool\ClientAuthenticateRepository')->authenticate($request->header('custom-token'))) {
             return response()->json([
                 'status_code' => 401,
-                'data'        => 'Client unauthorized',
+                'data'        => __('the client is not authorized'),
                 'time'        => time(),
             ], 401);
         }

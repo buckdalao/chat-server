@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Authentication Language Lines
@@ -13,13 +12,12 @@ return [
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-    'email_registered' => 'Email registered',
-    'phone_has_been_registered' => 'The phone number has been registered',
+    'failed'   => '用户名或密码错误。',
+    'throttle' => '您的尝试登录次数过多，请 :seconds 秒后再试。',
+    'email_registered' => '该邮箱已注册',
+    'phone_has_been_registered' => '该手机号已注册',
     'error' => [
-        'login_expired' => 'Login information has expired. Please login again',
-        'unauthorized' => 'Unauthorized.'
+        'login_expired' => '登录信息已过期，请重新登录',
+        'unauthorized' => '用户未登录或者登录信息过期'
     ]
-
 ];

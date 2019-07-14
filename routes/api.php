@@ -13,7 +13,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version(['v1'], [
     'namespace'  => 'App\Http\Controllers\Api',
-    'middleware' => ['api', 'api.throttle', 'clientAuth'],
+    'middleware' => ['api', 'api.throttle', 'client.auth'],
     'as' => 'api'
 ], function ($api) {
     $api->group(['prefix' => 'auth', 'as' => 'auth'], function ($api) {
@@ -31,7 +31,7 @@ $api->version(['v1'], [
     $api->group(['prefix' => 'lib', 'as' => 'lib'], function ($api) {
         $api->post('test', 'LoginController@test')->name('.test'); // 调试路由
         $api->get('getExpression', 'ExpressionController@expression'); // 获取表情包
-        $api->post('ping', 'HeartbeatController@ping')->middleware('refreshToken')->name('.ping'); // 心跳检测 参数 ping
+        $api->post('ping', 'HeartbeatController@ping')->middleware('refresh.token')->name('.ping'); // 心跳检测 参数 ping
     });
     $api->group([
         'prefix' => 'chat',
