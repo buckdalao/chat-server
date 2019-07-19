@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Api\Chat;
 
 use App\Repositories\Chat\ChatGroupRepository;
+use App\Repositories\Chat\ChatGroupUserRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class ChatGroupController extends Controller
 {
     protected $chatGroupRepository;
+    protected $chatGroupUserRepository;
 
-    public function __construct(ChatGroupRepository $chatGroupRepository)
+    public function __construct(ChatGroupRepository $chatGroupRepository, ChatGroupUserRepository $chatGroupUserRepository)
     {
         $this->chatGroupRepository = $chatGroupRepository;
+        $this->chatGroupUserRepository = $chatGroupUserRepository;
     }
 
     /**
@@ -26,8 +29,19 @@ class ChatGroupController extends Controller
         if (empty($groupId)) {
             return $this->badRequest(__('parameter error'));
         }
-        $members = $this->chatGroupRepository->getGroupUser($groupId);
-        return $this->successWithData($members);
+        $members = $this->chatGroupUserRepository->groupUserInfoList($groupId)->toArray();
+        $groupInfo = $this->chatGroupRepository->getGroupByGroupId($groupId)->toArray();
+        if ($groupInfo['photo']) {
+            $groupInfo['photo'] = asset($groupInfo['photo']);
+        }
+        foreach ($members as $v) {
+            if ($groupInfo['user_id'] == $v['user_id']) {
+                $groupInfo['group_owner_name'] = $v['group_user_name'] ?: $v['name'];
+                break;
+            }
+        }
+        $groupInfo['group_members'] = $members;
+        return $this->successWithData($groupInfo);
     }
 
     /**

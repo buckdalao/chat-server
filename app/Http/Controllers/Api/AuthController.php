@@ -55,9 +55,7 @@ class AuthController extends Controller
         if (!$token = auth('api')->attempt($credentials)) {
             return $this->fail(__('please check whether the email and password are correct'), 401);
         }
-        $friendsList = $this->userRepository->friendsListDetailed(auth('api')->user()->id);
-        $groupList = $this->userRepository->groupList(auth('api')->user()->id);
-        return $this->respondWithToken($token, $friendsList, $groupList);
+        return $this->respondWithToken($token);
     }
 
     /**
@@ -117,7 +115,7 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token, $friendsList = [], $groupList = [])
+    protected function respondWithToken($token)
     {
         $users = auth('api')->user()->toArray();
         $users['photo'] = asset($users['photo']);
@@ -126,8 +124,6 @@ class AuthController extends Controller
             'token_type'   => 'Bearer',
             'expires_in'   => auth('api')->factory()->getTTL() * 60,
             'users'        => $users,
-            'friend_list'  => $friendsList,
-            'group_list'   => $groupList,
         ]);
     }
 

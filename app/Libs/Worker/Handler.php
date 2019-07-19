@@ -83,7 +83,7 @@ class Handler
         }
         try {
             $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', $token)
-                ->header('Custom-Token', env('CLIENT_KEY'))->post('lib/ping', ['ping' => 1]);
+                ->header('Client-Key', env('CLIENT_KEY'))->post('lib/ping', ['ping' => 1]);
             $response = $response['data'];
             if (is_array($response)) {
                 $explode = explode(' ', $token);

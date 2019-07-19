@@ -69,4 +69,13 @@ class ChatGroupRepository extends EloquentRepository
         }
         return $uid;
     }
+
+    /**
+     * @param $groupId
+     * @return \Illuminate\Database\Eloquent\Model|null|object|static
+     */
+    public function getGroupByGroupId($groupId)
+    {
+        return $this->model->newQuery()->whereKey($groupId)->first();
+    }
 }
