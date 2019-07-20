@@ -26,14 +26,14 @@ class ChatUsersMessageController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getChatMessageByChatId(Request $request, $chatId)
+    public function getChatMessageByChatId(Request $request, $chatId, $limit)
     {
         if (empty($request->user()->id) || empty($chatId)){
             return $this->badRequest();
         }
         $mesList= [];
         if($chatId){
-            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId);
+            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50);
         }
         return $this->successWithData($mesList);
     }
@@ -45,7 +45,7 @@ class ChatUsersMessageController extends Controller
      * @param         $uid
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getChatMessageByUid(Request $request, $uid)
+    public function getChatMessageByUid(Request $request, $uid, $limit)
     {
         if (empty($request->user()->id) || empty($uid)){
             return $this->badRequest();
@@ -57,7 +57,7 @@ class ChatUsersMessageController extends Controller
         }
         $mesList= [];
         if($chatId){
-            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId);
+            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50);
         }
         return $this->successWithData($mesList);
     }
