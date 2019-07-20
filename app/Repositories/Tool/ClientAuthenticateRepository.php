@@ -37,7 +37,7 @@ class ClientAuthenticateRepository extends EloquentRepository
         $token = Str::uuid()->getHex();
         $this->create([
             'token'       => $token,
-            'expire_time' => $expireTime,
+            'expire_time' => $expireTime ? time() + (int)$expireTime : $expireTime,
             'status'      => 0
         ]);
         return $token;
@@ -53,16 +53,22 @@ class ClientAuthenticateRepository extends EloquentRepository
     }
 
     /**
+     * 获取client key的剩余时间 seconds  : -1 未设置 -2 未知key 0 已过期
+     *
      * @param $token
      * @return mixed|null
      */
     public function expToken($token)
     {
-        $res = $this->model->newQuery()->where('token', '=', $token)->first(['expire_time']);
+        $res = $this->model->newQuery()->where('token', '=', $token)->where('status', '=', 0)->first(['expire_time']);
         if ($res) {
-            return $res->expire_time;
+            if ($res->expire_time == 0) {
+                return -1;
+            }
+            $timeRemain = time() > $res->expire_time ? 0 : $res->expire_time - time();
+            return $timeRemain;
         } else {
-            return null;
+            return -2;
         }
     }
 }

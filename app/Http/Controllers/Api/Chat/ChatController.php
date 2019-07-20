@@ -250,11 +250,15 @@ class ChatController extends Controller
         });
         $applyNotify = $this->chatApplyRepository->getNotifyByUid($uid);
         $notifyCount = $this->userNotifyBadgeRepository->getBadgeByUid($uid);
+        $friendsList = $this->userRepository->friendsListDetailed($uid);
+        $groupList = $this->userRepository->groupList($uid);
         return $this->successWithData([
             'type'               => 'init',
-            'badge_list'         => $badgeResponse,
-            'apply_notify'       => $applyNotify,
-            'apply_notify_badge' => $notifyCount
+            'badge_list'         => $badgeResponse, // 好友和群列表的通知徽标数
+            'apply_notify'       => $applyNotify, // 系统通知列表
+            'apply_notify_badge' => $notifyCount, // 系统通知列表徽标数
+            'friend_list'        => $friendsList, // 好友列表
+            'group_list'         => $groupList,   // 群列表
         ]);
     }
 

@@ -24,7 +24,7 @@ class ArrayPaginator
 
     public function paginate($limit)
     {
-        $item = $this->splitArray($limit);
+        $item = $this->splitArray($limit ?: 15);
         $paginate = new LengthAwarePaginator($item, sizeof($this->data), $limit, $this->currentPage);
         return $paginate->withPath(\request()->path());
     }

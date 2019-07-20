@@ -80,10 +80,10 @@ class ChatUsersMessageRepository extends EloquentRepository
                         }
                     });
                 }
+            } else {
+                $class = new ArrayPaginator();
+                $mes = $class->setArray($mes)->paginate($limit);
             }
-        } else {
-            $class = new ArrayPaginator();
-            $mes = $class->setArray($mes)->paginate($limit);
         }
         return $mes;
     }

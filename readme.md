@@ -66,9 +66,9 @@ php artisan message {save|list|ttl} {--key=}
      
      
 # 创建repository文件   
-#生成文件的namespace 是 App\Repositories\   
-#model是基于 App\Models\下  
-#model可选参数
+# 生成文件的namespace 是 App\Repositories\   
+# model是基于 App\Models\下  
+# model可选参数
 
 php artisan make:repository exampleRepository --model=User // 该文件namespace App\Repositories\exampleRepository  use App\Models\User  生成文件在app/Repositories目录
 
@@ -76,9 +76,9 @@ php artisan make:repository Test/exampleRepository --model=Test/User // 该文�
 
 # 获取client key
 
-get key : php artisan client:key get --key=expire_time (int) // 将返回的key值加入到.env CLIENT_KEY
-delete key : php artisan client:key del --key=client_key (string)
-get key expire time: php artisan client:key ttl --key=client_key (string)
+get key : php artisan client:key get --key=expire_time (int) // expire_time 单位seconds  将返回的key值加入到.env CLIENT_KEY
+delete key : php artisan client:key del --key=client_key (string) // 删除client key 删除后立即失效
+get key expire time: php artisan client:key ttl --key=client_key (string) // -1 永久有效 -2 未知key 0 已过期  返回剩余时间
 ```
  
 
