@@ -17,10 +17,8 @@ class EnableCrossRequest
     {
         $response = $next($request);
         $origin = $request->server('HTTP_ORIGIN') ? $request->server('HTTP_ORIGIN') : '';
-        $allow_origin = [
-            'http://localhost:9080',
-        ];
-        if (in_array($origin, $allow_origin)) {
+        $allowOrigin = explode(',', env('ALLOW_ORIGIN')) ?: [];
+        if (in_array($origin, $allowOrigin)) {
             $response->header('Access-Control-Allow-Origin', $origin);
             $response->header('Access-Control-Allow-Headers', 'Origin, Content-Type, Cookie, X-CSRF-TOKEN, Accept, Authorization, X-XSRF-TOKEN, Client-Key');
             $response->header('Access-Control-Expose-Headers', 'Authorization, authenticated');
