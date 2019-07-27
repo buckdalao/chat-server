@@ -7,14 +7,11 @@ use App\Http\Controllers\Controller;
 
 class IndexController extends Controller
 {
-    //
-    public function __construct()
-    {
-        $this->middleware('guest');
-    }
 
-    public function home()
+    public function index()
     {
-        return view('chat.home');
+        return view('chat.home', [
+            'title' => 'Home'
+        ]);
     }
 }

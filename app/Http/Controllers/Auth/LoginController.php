@@ -25,7 +25,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/chat/room';
+    protected $redirectTo = '/chat';
 
     /**
      * Create a new controller instance.
@@ -35,5 +35,12 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    public function loginPage()
+    {
+        return view('chat.login', [
+            'title' => 'Login'
+        ]);
     }
 }

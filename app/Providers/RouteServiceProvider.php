@@ -40,6 +40,9 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapWebRoutes();
 
         //
+        $this->mapWebResourceRoutes();
+
+        $this->mapWebChatRoutes();
     }
 
     /**
@@ -69,5 +72,33 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "web" routes for the application.
+     *
+     * These routes all receive session state, CSRF protection, etc.
+     *
+     * @return void
+     */
+    protected function mapWebResourceRoutes()
+    {
+        Route::middleware('web')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/web/resource.php'));
+    }
+
+    /**
+     * Define the "web" routes for the application.
+     *
+     * These routes all receive session state, CSRF protection, etc.
+     *
+     * @return void
+     */
+    protected function mapWebChatRoutes()
+    {
+        Route::middleware('web')
+            ->namespace($this->namespace . '\Chat')
+            ->group(base_path('routes/web/chat.php'));
     }
 }
