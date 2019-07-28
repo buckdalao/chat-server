@@ -11,7 +11,8 @@ class IndexController extends Controller
     public function index()
     {
         return view('chat.home', [
-            'title' => 'Home'
+            'title' => 'Home',
+            'user' => \request()->user()
         ]);
     }
 }

@@ -96,10 +96,7 @@
                             is_app: false
                         }), config).then((response) => {
                             console.log(response)
-                            if (response.data.status_code === 200) {
-                                location.href = 'chat/room'
-                                this.loading = false
-                            }
+                            location.href = '/chat'
                         }).catch((e) => {
                             console.log(e)
                             this.loading = false
