@@ -12,4 +12,14 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, Helpers, LibBaseTrait;
+
+    public function __construct()
+    {
+        $currentRouteName = request()->route()->getName();
+        $suffix = collect(explode('.', $currentRouteName))->last();
+        if ($suffix != 'public'){
+            $this->middleware('permission:' . $currentRouteName);
+        }
+
+    }
 }

@@ -87,18 +87,25 @@
                 this.$refs[name].validate((valid) => {
                     if (valid) {
                         this.loading = true;
-                        config.headers = {
-                            'Accept': 'application/prs.chat.v1+json',
-                        }
                         axios.post('/auth/login', Qs.stringify({
                             email: this.formInline.mail,
                             password: this.formInline.password,
                             is_app: false
-                        }), config).then((response) => {
-                            console.log(response)
-                            location.href = '/chat'
+                        })).then((response) => {
+                            http.post('/chat/init').then((r) => {
+                                localStorage.setItem('clientKey', r.data.data.client_key);
+                                localStorage.setItem('tokenType', 'bearer');
+                                localStorage.setItem('token', r.data.data.token);
+                                location.href = '/chat'
+                            }).catch((e) => {
+                                this.loading = false
+                                this.$Notice.error({
+                                    title: '错误提醒',
+                                    desc: e.response.data.data
+                                })
+                                http.post('/auth/logout')
+                            })
                         }).catch((e) => {
-                            console.log(e)
                             this.loading = false
                             this.$Notice.error({
                                 title: '错误提醒',

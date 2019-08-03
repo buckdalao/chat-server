@@ -13,7 +13,7 @@
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 Route::get('auth/login', 'Auth\LoginController@loginPage')->name('login');
 Route::post('auth/login', 'Auth\LoginController@login')->name('auth.login');
-Route::get('auth/logout', 'Auth\LoginController@logout')->name('logout');
+Route::post('auth/logout', 'Auth\LoginController@logout')->name('logout');

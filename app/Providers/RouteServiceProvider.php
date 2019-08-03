@@ -43,6 +43,10 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapWebResourceRoutes();
 
         $this->mapWebChatRoutes();
+
+        $this->mapChatApiRoutes();
+
+        $this->mapManageApiRoutes();
     }
 
     /**
@@ -72,6 +76,29 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "api" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
+     */
+    protected function mapChatApiRoutes()
+    {
+        Route::prefix('api')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/api/chat.php'));
+    }
+
+    protected function mapManageApiRoutes()
+    {
+        Route::prefix('api')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/api/manage.php'));
     }
 
     /**

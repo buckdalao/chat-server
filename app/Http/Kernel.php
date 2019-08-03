@@ -67,6 +67,9 @@ class Kernel extends HttpKernel
         // token刷新
         'refresh.token' => \App\Http\Middleware\RefreshToken::class,
         'client.auth' => \App\Http\Middleware\ClientAuthenticate::class,
+        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+        'role'       => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
     ];
 
     /**

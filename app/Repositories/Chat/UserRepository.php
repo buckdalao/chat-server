@@ -92,6 +92,8 @@ class UserRepository extends EloquentRepository
     }
 
     /**
+     * 通过uid 获取用户信息
+     *
      * @param $uid
      * @return \Illuminate\Database\Eloquent\Collection|static[]
      */
@@ -101,6 +103,8 @@ class UserRepository extends EloquentRepository
     }
 
     /**
+     * 通过chat_number获取用户信息
+     *
      * @param $cn
      * @return \Illuminate\Database\Eloquent\Model|null|object|static
      */
@@ -109,13 +113,42 @@ class UserRepository extends EloquentRepository
         return $this->model->newQuery()->where('chat_number', '=', $cn)->first();
     }
 
+    /**
+     * 通过email获取客户信息
+     *
+     * @param $email
+     * @return \Illuminate\Database\Eloquent\Model|null|object|static
+     */
     public function getUserByEmail($email)
     {
         return $this->model->newQuery()->where('email', '=', $email)->first();
     }
 
+    /**
+     * 通过phone获取客户信息
+     *
+     * @param $phone
+     * @return \Illuminate\Database\Eloquent\Model|null|object|static
+     */
     public function getUserByPhone($phone)
     {
         return $this->model->newQuery()->where('phone', '=', $phone)->first();
+    }
+
+    /**
+     * 获取所有用户列表
+     *
+     * @param null $keyword  搜索关键字
+     * @param int  $limit  每页显示条目
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function allUser($keyword = null, $limit = 15)
+    {
+        if ($keyword) {
+            return $this->model->newQuery()->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', "%{$keyword}%")->orWhere('email', 'like', "%{$keyword}%")->orWhere('chat_number', '=', (int)$keyword);
+            })->paginate($limit ?? 15);
+        }
+        return $this->model->newQuery()->paginate($limit ?? 15);
     }
 }

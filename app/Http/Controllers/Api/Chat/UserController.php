@@ -71,4 +71,15 @@ class UserController extends Controller
             'is_friend' => $isFriend
         ]);
     }
+
+    /**
+     * 用户列表 带分页信息 支持keyword参数模糊查询
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllUsers(Request $request)
+    {
+        return $this->successWithData($this->userRepository->allUser($request->get('keyword')));
+    }
 }

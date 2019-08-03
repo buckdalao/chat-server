@@ -58,4 +58,15 @@ class ChatGroupController extends Controller
         $groupId = $this->chatGroupRepository->createGroup($request->user()->id, $request->get('group_name'));
         return $this->successWithData(['group_id' => $groupId]);
     }
+
+    /**
+     * 获取所有群
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllGroupList(Request $request)
+    {
+        return $this->successWithData($this->chatGroupRepository->allGroup($request->get('keyword')));
+    }
 }

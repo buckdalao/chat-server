@@ -46,6 +46,8 @@ class ChatGroupRepository extends EloquentRepository
     }
 
     /**
+     * 通过 chat number 获取群信息
+     *
      * @param $cn
      * @return \Illuminate\Database\Eloquent\Model|null|object|static
      */
@@ -71,11 +73,30 @@ class ChatGroupRepository extends EloquentRepository
     }
 
     /**
+     * 通过group_id 获取群信息
+     *
      * @param $groupId
      * @return \Illuminate\Database\Eloquent\Model|null|object|static
      */
     public function getGroupByGroupId($groupId)
     {
         return $this->model->newQuery()->whereKey($groupId)->first();
+    }
+
+    /**
+     * 获取所有群列表
+     *
+     * @param null $keyword
+     * @param int  $limit
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function allGroup($keyword = null, $limit = 15)
+    {
+        if ($keyword) {
+            return $this->model->newQuery()->where(function ($query) use ($keyword) {
+                $query->where('group_name', 'like', "%{$keyword}%")->orWhere('group_number', '=', (int)$keyword);
+            })->paginate($limit ?? 15);
+        }
+        return $this->model->newQuery()->paginate($limit ?? 15);
     }
 }

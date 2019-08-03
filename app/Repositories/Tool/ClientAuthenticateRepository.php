@@ -14,6 +14,12 @@ class ClientAuthenticateRepository extends EloquentRepository
         $this->model = $model;
     }
 
+    /**
+     *  client key 验证
+     *
+     * @param $token
+     * @return bool
+     */
     public function authenticate($token)
     {
         if ($token) {
@@ -70,5 +76,20 @@ class ClientAuthenticateRepository extends EloquentRepository
         } else {
             return -2;
         }
+    }
+
+    /**
+     * 获取所有授权码
+     *
+     * @param null $keyword
+     * @param int  $limit
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function keyList($keyword = null, $limit = 15)
+    {
+        if ($keyword) {
+            return $this->model->newQuery()->where('token', '=', $keyword)->paginate($limit ?? 15);
+        }
+        return $this->model->newQuery()->paginate($limit ?? 15);
     }
 }
