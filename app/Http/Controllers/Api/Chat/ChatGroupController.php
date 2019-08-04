@@ -14,6 +14,7 @@ class ChatGroupController extends Controller
 
     public function __construct(ChatGroupRepository $chatGroupRepository, ChatGroupUserRepository $chatGroupUserRepository)
     {
+        parent::__construct();
         $this->chatGroupRepository = $chatGroupRepository;
         $this->chatGroupUserRepository = $chatGroupUserRepository;
     }

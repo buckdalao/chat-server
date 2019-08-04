@@ -9,6 +9,11 @@ use Spatie\Permission\Models\Role;
 
 class RolesController extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     public function createSuperAdmin(Request $request)
     {
         if ($request->user()->id != 1) {
@@ -36,5 +41,15 @@ class RolesController extends Controller
         Validator::make($request->all(), [
             'uid' => 'required|string',
         ])->validate();
+    }
+
+    public function roleList(Request $request)
+    {
+        if ($request->get('keyword')) {
+            $list = Role::query()->where('name', 'like', "%".$request->get('keyword'))->paginate(15);
+        } else {
+            $list = Role::query()->paginate(15);
+        }
+        return $this->successWithData($list);
     }
 }

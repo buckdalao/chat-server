@@ -16,7 +16,8 @@ class Kernel extends ConsoleKernel
         //
         Commands\WorkermanServer::class,
         Commands\RepositoryMake::class,
-        Commands\ChatMessage::class
+        Commands\ChatMessage::class,
+        Commands\RouteToPermission::class,
     ];
 
     /**

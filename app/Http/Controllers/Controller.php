@@ -15,11 +15,12 @@ class Controller extends BaseController
 
     public function __construct()
     {
-        $currentRouteName = request()->route()->getName();
-        $suffix = collect(explode('.', $currentRouteName))->last();
-        if ($suffix != 'public'){
-            $this->middleware('permission:' . $currentRouteName);
+        if (request()->route()) {
+            $currentRouteName = request()->route()->getName();
+            $suffix = collect(explode('.', $currentRouteName))->last();
+            if ($suffix == 'protected') {
+                $this->middleware('permission:' . $currentRouteName);
+            }
         }
-
     }
 }

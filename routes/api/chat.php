@@ -67,10 +67,6 @@ $api->version(['v1'], [
         $api->get('connect/close', 'ChatController@onConnectClose')->name('.connectClose'); // websocket断开接口
         $api->post('reset/badge', 'ChatMessageBadgeController@resetBadge')->name('.resetBadge'); // 重置消息提醒 param:chat_id or group id & is_group
 
-
-        $api->get('/all/user', 'UserController@getAllUsers')->name('.getAllUsers'); // 获取所有用户列表  支持参数keyword模糊查询 带分页信息
-        $api->get('/all/group', 'ChatGroupController@getAllGroupList')->name('.getAllGroupList'); // 获取所有群列表  支持参数keyword模糊查询 带分页信息
-        $api->get('/key/list', 'Util\ClientKeyController@getClientAuthList')->name('.getClientAuthList');// 获取所有client key列表  支持参数keyword模糊查询 带分页信息
     });
     $api->group([
         'prefix' => 'media',

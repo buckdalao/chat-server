@@ -13,6 +13,7 @@ class ClientKeyController extends Controller
 
     public function __construct(ClientAuthenticateRepository $clientAuthenticateRepository)
     {
+        parent::__construct();
         $this->clientAuthenticate = $clientAuthenticateRepository;
     }
 

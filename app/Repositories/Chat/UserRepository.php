@@ -146,7 +146,7 @@ class UserRepository extends EloquentRepository
     {
         if ($keyword) {
             return $this->model->newQuery()->where(function ($query) use ($keyword) {
-                $query->where('name', 'like', "%{$keyword}%")->orWhere('email', 'like', "%{$keyword}%")->orWhere('chat_number', '=', (int)$keyword);
+                $query->where('name', 'like', "{$keyword}%")->orWhere('email', 'like', "{$keyword}%")->orWhere('chat_number', '=', (int)$keyword);
             })->paginate($limit ?? 15);
         }
         return $this->model->newQuery()->paginate($limit ?? 15);

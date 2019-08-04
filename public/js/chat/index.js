@@ -16,10 +16,21 @@ new Vue({
         permissionKeyword: '',
         permissionsList: [],
         perListLoading: true,
+        routeToPermissionLoad: false,
         routeList: [],
         routeListLoading: true,
         routeListKeyword: '',
-        routeListSelect: ''
+        routeListSelect: '',
+        rolesList: [],
+        rolesListLoading: true,
+        rolesListKeyword: '',
+        rolesListSelect: '',
+        createRolesLoading: false,
+        createRoleShow: false,
+        createRoleModel: {
+            roleName: '',
+            roleGuardName: 'chat'
+        }
     },
     computed: {
         CKLColumns () {
@@ -131,20 +142,16 @@ new Vue({
             let col = [
                 {
                     title: 'ID',
-                    key: 'group_id',
+                    key: 'id',
                     sortable: true
                 },
                 {
                     title: 'Name',
-                    key: 'group_name'
+                    key: 'name'
                 },
                 {
-                    title: 'Group number',
-                    key: 'group_number',
-                },
-                {
-                    title: 'Group manager ID',
-                    key: 'user_id'
+                    title: 'Guard name',
+                    key: 'guard_name',
                 },
                 {
                     title: 'Create time',
@@ -158,6 +165,10 @@ new Vue({
                     align: 'center'
                 }
             ];
+            if (this.userId === 1) {
+                return col
+            }
+            return col.filter((c, index) => index < col.length - 1)
             return col
         },
         routeListColumns () {
@@ -188,6 +199,49 @@ new Vue({
                 }
             ];
             return col
+        },
+        rolesListColumns () {
+            let col = [
+                {
+                    title: 'ID',
+                    key: 'id',
+                    sortable: true
+                },
+                {
+                    title: 'Name',
+                    key: 'name'
+                },
+                {
+                    title: 'Guard name',
+                    key: 'guard_name',
+                },
+                {
+                    title: 'Create time',
+                    key: 'created_at',
+                    sortable: true
+                },
+                {
+                    title: 'Action',
+                    slot: 'action',
+                    width: 150,
+                    align: 'center'
+                }
+            ];
+            if (this.userId === 1) {
+                return col
+            }
+            return col.filter((c, index) => index < col.length - 1)
+            return col
+        },
+        createRoleRule () {
+            return {
+                roleName: [
+                    {required: true, message: '请输入角色名', trigger: 'blur'},
+                ],
+                roleGuardName: [
+                    {required: true, message: '请选择guard name', trigger: 'blur'},
+                ]
+            }
         }
     },
     methods: {
@@ -211,6 +265,12 @@ new Vue({
             }
             if (name === 'routeList') {
                 this.getRouteList(1)
+            }
+            if (name === 'permissions') {
+                this.getPermissionList(1)
+            }
+            if (name === 'rolesList') {
+                this.getRolesList(1)
             }
         },
         exportData (type) {
@@ -241,7 +301,7 @@ new Vue({
         },
         getUserList (page) {
             this.userListLoading = true
-            http.get('/api/chat/all/user?page=' + page + '&keyword=' + this.searchValue).then((r) => {
+            http.get('/api/manage/chat/all/user?page=' + page + '&keyword=' + this.searchValue).then((r) => {
                 this.userList = r.data.data
                 this.userListLoading = false
             }).catch((e) => {
@@ -260,7 +320,7 @@ new Vue({
         },
         getClientKeyList (page) {
             this.CKLLoading = true
-            http.get('/api/chat/key/list?page=' + page + '&keyword=' + this.searchValueCL).then((r) => {
+            http.get('/api/manage/chat/key/list?page=' + page + '&keyword=' + this.searchValueCL).then((r) => {
                 this.clientKeyList = r.data.data
                 this.CKLLoading = false
             }).catch((e) => {
@@ -282,7 +342,7 @@ new Vue({
         },
         getGroupList (page) {
             this.GLLoading = true
-            http.get('/api/chat/all/group?page=' + page + '&keyword=' + this.searchValueGL).then((r) => {
+            http.get('/api/manage/chat/all/group?page=' + page + '&keyword=' + this.searchValueGL).then((r) => {
                 this.groupList = r.data.data
                 this.GLLoading = false
             }).catch((e) => {
@@ -308,17 +368,29 @@ new Vue({
                 this.group = r.data.data
             })
         },
+        getPermissionList (page) {
+            this.perListLoading = true
+            http.get('/api/manage/permission/list?page=' + page + '&keyword=' + this.permissionKeyword).then((r) => {
+                this.permissionsList = r.data.data
+                this.perListLoading = false
+                this.routeToPermissionLoad =false
+            }).catch((e) => {
+                console.log(e)
+                this.perListLoading = false
+                this.routeToPermissionLoad = false
+            })
+        },
         permissionsListSearch (type) {
-            if (type === 1 && this.searchValueGL) {
-                this.getGroupList(1)
+            if (type === 1 && this.permissionKeyword) {
+                this.getPermissionList(1)
             }
-            if (type ===2 && this.searchValueGL) {
-                this.searchValueGL = ''
-                this.getGroupList(1)
+            if (type ===2 && this.permissionKeyword) {
+                this.permissionKeyword = ''
+                this.getPermissionList(1)
             }
         },
         permissionsListJump (page) {
-
+            this.getPermissionList(page)
         },
         getRouteList (page) {
             this.routeListLoading = true
@@ -341,6 +413,56 @@ new Vue({
                 this.routeListKeyword = ''
                 this.getRouteList(1)
             }
+        },
+        getRolesList (page) {
+            this.rolesListLoading = true
+            http.get('/api/manage/permission/role/list?page=' + page + '&keyword=' + this.rolesListKeyword).then((r) => {
+                this.rolesList = r.data.data
+                this.rolesListLoading = false
+            }).catch((e) => {
+                console.log(e)
+                this.rolesListLoading = false
+            })
+        },
+        rolesListJump (page) {
+            this.getRolesList(page)
+        },
+        rolesListSearch (type) {
+            if (type === 1 && this.rolesListKeyword) {
+                this.getRolesList(1)
+            }
+            if (type ===2 && this.rolesListKeyword) {
+                this.rolesListKeyword = ''
+                this.getRolesList(1)
+            }
+        },
+        routeToPermission () {
+            this.perListLoading = true
+            this.routeToPermissionLoad = true
+            http.post('/api/manage/permission/route/set').then((r) => {
+                this.getPermissionList(1)
+                this.$Message.success({
+                    content: 'success',
+                    duration: 3
+                });
+            }).catch((e) => {
+                console.log(e)
+                this.perListLoading = false
+                routeToPermissionLoad = false
+            })
+        },
+        createRoles (name) {
+            this.$refs[name].validate((valid) => {
+                if (valid) {
+                    this.createRolesLoading = true;
+
+                } else {
+                    this.$Notice.error({
+                        title: '错误提醒',
+                        desc: '填写格式有误'
+                    })
+                }
+            })
         }
     },
     created () {

@@ -23,6 +23,9 @@
 @yield('content')
 </body>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var csrf_token = document.querySelector('meta[name=csrf-token]').content;
+</script>
 <script src="/js/chat/axios.js?v={{rand(1,99)}}"></script>
 <script type="text/javascript" src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
 <script type="text/javascript" src="https://unpkg.com/iview/dist/iview.min.js"></script>

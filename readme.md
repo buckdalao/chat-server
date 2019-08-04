@@ -79,6 +79,10 @@ php artisan make:repository Test/exampleRepository --model=Test/User // 该文�
 get key : php artisan client:key get --key=expire_time (int) // expire_time 单位seconds  将返回的key值加入到.env CLIENT_KEY
 delete key : php artisan client:key del --key=client_key (string) // 删除client key 删除后立即失效
 get key expire time: php artisan client:key ttl --key=client_key (string) // -1 永久有效 -2 未知key 0 已过期  返回剩余时间
+
+#将所有路由写入到权限列表并创建root角色给user_id的用户
+php artisan route:toPermission
+
 ```
  
 

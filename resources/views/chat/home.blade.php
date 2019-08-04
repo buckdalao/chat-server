@@ -201,9 +201,10 @@
                                     {{--<i-select v-model="searchKey" class="i-search-col">
                                         <i-option :value="111">111</i-option>
                                     </i-select>--}}
-                                    <i-input clearable placeholder="输入关键字搜索" class="i-search-input" v-model="permissionKeyword" ></i-input>
+                                    <i-input clearable placeholder="输入Name关键字搜索" class="i-search-input" v-model="permissionKeyword" ></i-input>
                                     <i-button @click="permissionsListSearch(1)" class="search-btn" type="primary">搜索</i-button>
                                     <i-button @click="permissionsListSearch(2)" class="search-btn" type="success">重置</i-button>
+                                    <i-button @click="routeToPermission" :loading="routeToPermissionLoad" class="search-btn" type="success">更新路由权限</i-button>
                                 </div>
                                 <div>
                                     <i-table :loading="perListLoading" :columns="perListColumns" :data="permissionsList.data" ref="permissionsListTable">
@@ -227,7 +228,7 @@
                                         <i-option value="POST">POST</i-option>
                                         <i-option value="DELETE">DELETE</i-option>
                                     </i-select>
-                                    <i-input clearable placeholder="输入Uri关键字搜索" class="i-search-input" v-model="routeListKeyword" ></i-input>
+                                    <i-input clearable placeholder="输入Name关键字搜索" class="i-search-input" v-model="routeListKeyword" ></i-input>
                                     <i-button @click="routeListSearch(1)" class="search-btn" type="primary">搜索</i-button>
                                     <i-button @click="routeListSearch(2)" class="search-btn" type="success">重置</i-button>
                                 </div>
@@ -243,6 +244,47 @@
                                 </div>
                             </div>
                         </Card>
+                    </tab-pane>
+                    <tab-pane label="角色管理" name="rolesList">
+                        <Card style="width: 100%">
+                            <div>
+                                <div class="i-search-con i-search-con-top">
+                                    <i-input clearable placeholder="输入Name关键字搜索" class="i-search-input" v-model="rolesListKeyword" ></i-input>
+                                    <i-button @click="rolesListSearch(1)" class="search-btn" type="primary">搜索</i-button>
+                                    <i-button @click="rolesListSearch(2)" class="search-btn" type="success">重置</i-button>
+                                    <i-button @click="createRoleShow = true" class="search-btn" type="success">新建角色</i-button>
+                                </div>
+                                <div>
+                                    <i-table :loading="rolesListLoading" :columns="rolesListColumns" :data="rolesList.data" ref="rolesListTable">
+                                        <template slot-scope="{ row, index }" slot="action">
+                                            <i-button type="error" size="small">Cancel</i-button>
+                                        </template>
+                                    </i-table>
+                                    <div style="text-align: right;padding: 10px 0;">
+                                        <Page @on-change="rolesListJump" :total="rolesList.total" :current="rolesList.current_page" :page-size="rolesList.per_page" show-elevator show-total />
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                        <Modal v-model="createRoleShow" :mask-closable="false" footer-hide>
+                            <p slot="header" style="text-align: center;">创建角色</p>
+                            <i-form ref="createRoleForm" :model="createRoleModel" :rules="createRoleRule" :label-width="100">
+                                <form-item prop="roleName" label="角色名">
+                                    <i-input v-model="createRoleModel.roleName" placeholder="请角色名"></i-input>
+                                </form-item>
+                                <form-item prop="roleGuardName" label="Guard name">
+                                    <i-select v-model="createRoleModel.roleGuardName" class="i-search-col">
+                                        <i-option value="chat">chat</i-option>
+                                    </i-select>
+                                </form-item>
+                                <form-item>
+                                    <i-button type="primary" :loading="createRolesLoading" @click="createRoles('createRoleForm')">
+                                        <span v-if="!createRolesLoading">Sign in</span>
+                                        <span v-else>Loading...</span>
+                                    </i-button>
+                                </form-item>
+                            </i-form>
+                        </Modal>
                     </tab-pane>
                 </Tabs>
             </i-content>

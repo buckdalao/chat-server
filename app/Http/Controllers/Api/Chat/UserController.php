@@ -15,6 +15,7 @@ class UserController extends Controller
 
     public function __construct(UserRepository $repository, ChatUsersRepository $chatUsersRepository)
     {
+        parent::__construct();
         $this->userRepository = $repository;
         $this->chatUsersRepository = $chatUsersRepository;
     }

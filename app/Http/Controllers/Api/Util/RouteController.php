@@ -10,13 +10,18 @@ use Illuminate\Support\Str;
 
 class RouteController extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     public function routeList(Request $request)
     {
         $route = new RouteList();
         $list = $route->getRoutes();
         if ($request->get('keyword')) {
             $list = collect($list)->filter(function ($item) use ($request) {
-                if (Str::contains($item['uri'], $request->get('keyword'))) {
+                if (Str::contains($item['name'], $request->get('keyword'))) {
                     return $item;
                 }
             })->toArray();

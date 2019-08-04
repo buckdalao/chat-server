@@ -38,9 +38,22 @@ class RouteList
      */
     public function getRoutes()
     {
-        $routes = collect(Routes::getRoutes())->map(function ($route) {
+        $haveRoute = [];
+        $routes = collect(Routes::getRoutes())->map(function ($route) use (&$haveRoute) {
+            $haveRoute[] = $route->getName();
             return $this->getRouteInformation($route);
         })->all();
+
+        collect(app('Dingo\Api\Routing\Router')->getRoutes())->each(function ($collection) use (&$routes, &$haveRoute) {
+            collect($collection)->each(function ($route) use (&$routes, &$haveRoute) {
+                if (!in_array($route->getName(), $haveRoute)) {
+                    $api = $this->getRouteInformation($route);
+                    $api['versions'] = implode(', ', $route->versions());
+                    array_push($routes, $api);
+                    $haveRoute[] = $route->getName();
+                }
+            });
+        });
 
         if ($sort = $this->sort) {
             $routes = $this->sortRoutes($sort, $routes);
@@ -68,6 +81,7 @@ class RouteList
             'name'   => $route->getName(),
             'action' => ltrim($route->getActionName(), '\\'),
             'middleware' => $this->getMiddleware($route),
+            'versions' => method_exists($route, 'versions') ? implode(', ', $route->versions()) : ''
         ];
     }
 

@@ -12,6 +12,7 @@ http.interceptors.request.use(function (config) {
         config.headers.Authorization = localStorage.getItem('tokenType') + ' ' + localStorage.getItem('token')
     }
     config.headers.common['Accept-Language'] = 'zh-CN'
+    //config.headers.common['X-CSRF-TOKEN'] = csrf_token
     config.headers.common['Client-Key'] = localStorage.getItem('clientKey') ? localStorage.getItem('clientKey') : ''
     return config
 }, function (error) {
@@ -30,6 +31,9 @@ http.interceptors.response.use(function (response) {
             localStorage.clear()
             location.href = '/auth/login'
         })
+    }
+    if (error.response.status === 419 || error.response.data.status_code === 419) {
+        location.reload()
     }
     return Promise.reject(error)
 })
