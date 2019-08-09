@@ -15,7 +15,9 @@ class CreateClientAuthenticate extends Migration
     {
         Schema::create('client_authenticate', function (Blueprint $table) {
             $table->increments('id');
-            $table->uuid('token')->unique()->comment('授权码');
+            $table->unsignedInteger('app_id')->unique()->comment('开发者ID');
+            $table->uuid('secret_id')->unique()->comment('秘钥ID');
+            $table->uuid('secret_key')->comment('秘钥');
             $table->unsignedInteger('expire_time')->comment('过期时间(时间戳)');
             $table->unsignedTinyInteger('status')->default(0)->comment('状态');
             $table->timestamp('created_at')->nullable()->useCurrent();

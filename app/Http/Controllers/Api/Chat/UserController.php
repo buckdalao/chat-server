@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Chat;
 
 use App\Repositories\Chat\ChatUsersRepository;
 use App\Repositories\Chat\UserRepository;
+use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -81,6 +82,16 @@ class UserController extends Controller
      */
     public function getAllUsers(Request $request)
     {
-        return $this->successWithData($this->userRepository->allUser($request->get('keyword')));
+        $list = $this->userRepository->allUser($request->get('keyword'));
+        if (sizeof($list->items())) {
+            collect($list->items())->map(function ($item) {
+                $user = User::find($item->id);
+                if ($user) {
+                    $item['roles'] = $user->getRoleNames();
+                }
+                return $item;
+            });
+        }
+        return $this->successWithData($list);
     }
 }

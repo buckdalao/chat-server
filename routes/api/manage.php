@@ -19,14 +19,20 @@ $api->version(['v1'], [
 ], function ($api) {
     $api->group([
         'prefix' => 'permission',
-        'where' => ['group_id' => '[\d]+', 'chat_id' => '[\d]+'],
+        'where' => ['role_id' => '[\d]+', 'permission' => '[\d]+', 'guard_name' => 'chat'],
         'as' => 'chat.permissions',
         'namespace' => 'Permission'
     ], function ($api) {
         $api->post('super/admin/create', 'RolesController@createSuperAdmin')->name('.createSuperAdmin.protected'); // 创建超管用户
         $api->post('route/set', 'PermissionController@routeToPermission')->name('.routeToPermission.protected'); // 将所有路由写入到权限列表
-        $api->get('list', 'PermissionController@permissionList')->name('.list.protected'); // 将所有路由写入到权限列表
-        $api->get('role/list', 'RolesController@roleList')->name('.roleList.protected'); // 将所有路由写入到权限列表
+        $api->get('list', 'PermissionController@permissionList')->name('.list.protected'); // 权限分页展示列表
+        $api->get('role/list', 'RolesController@roleList')->name('.roleList.protected'); // 角色分页展示列表
+        $api->get('role/all', 'RolesController@allRoles')->name('.allRoles.protected'); // 所有角色
+        $api->post('role/create', 'RolesController@createRoles')->name('.createRoles.protected'); // 创建角色 param: roles & guard
+        $api->post('give/role', 'PermissionController@assignRoles')->name('.assignRoles.protected'); // 权限赋予给角色 param: roles & guard & permission
+        $api->post('role/give/user', 'RolesController@giveRoleToUser')->name('.giveRoleToUser.protected'); // 角色赋予给用户 param: roles & guard & uid
+        $api->delete('role/{role_id}/{guard_name}/delete', 'RolesController@deleteRoles')->name('.deleteRoles.protected'); // 删除角色 param: roles & guard
+        $api->delete('{permission}/{guard_name}/delete', 'PermissionController@deletePermission')->name('.deletePermission.protected'); // 删除权限 param: permission & guard
     });
     $api->group([
         'prefix' => 'route',

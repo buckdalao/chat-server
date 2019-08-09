@@ -15,7 +15,7 @@ class ClientAuthenticate
      */
     public function handle($request, Closure $next)
     {
-        if (!app('App\Repositories\Tool\ClientAuthenticateRepository')->authenticate($request->header('client-key'))) {
+        if (!app('App\Libs\ApiAuthenticate')->setRequest($request)->verify()) {
             return response()->json([
                 'status_code' => 401,
                 'data'        => __('the client is not authorized'),

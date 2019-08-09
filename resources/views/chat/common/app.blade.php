@@ -26,9 +26,10 @@
 <script>
     var csrf_token = document.querySelector('meta[name=csrf-token]').content;
 </script>
-<script src="/js/chat/axios.js?v={{rand(1,99)}}"></script>
 <script type="text/javascript" src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
 <script type="text/javascript" src="https://unpkg.com/iview/dist/iview.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/crypto-js@3.1.9-1/crypto-js.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
+<script src="/js/chat/axios.js?v={{rand(1,99)}}"></script>
 @yield('script')
 </html>

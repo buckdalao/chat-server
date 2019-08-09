@@ -13,7 +13,8 @@ class IndexController extends Controller
     {
         return response()->view('chat.home', [
             'title' => 'Home',
-            'user' => \request()->user()
+            'user' => \request()->user(),
+            'isRoot' => \request()->user()->hasRole('root')
         ]);
     }
 
@@ -23,7 +24,7 @@ class IndexController extends Controller
         if ($token) {
             return $this->successWithData([
                 'token' => $token,
-                'client_key' => env('CLIENT_KEY')
+                'client_key' => env('SECRET_ID')
             ]);
         } else {
             return $this->fail(__('unexpected mistakes occur'), 401);

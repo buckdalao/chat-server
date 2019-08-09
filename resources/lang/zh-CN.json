@@ -17,5 +17,6 @@
   "the new password cannot be the same as the old one": "新密码不能和原密码相同",
   "unexpected mistakes occur": "发送意料之外的错误",
   "the client is not authorized": "客户端未获得授权",
-  "the given data was invalid": "提交的数据不可用"
+  "the given data was invalid": "提交的数据不可用",
+  "root user cannot be deleted": "root用户无法删除"
 }

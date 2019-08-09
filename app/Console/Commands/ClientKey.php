@@ -52,7 +52,7 @@ class ClientKey extends Command
             case 'get':
                 if (is_numeric($key['key'])) {
                     $clientKey = app('App\Repositories\Tool\ClientAuthenticateRepository')->setToken($key['key']);
-                    echo "\033[0;32mClient Key: $clientKey\033[0m" . PHP_EOL;
+                    echo "\033[0;32mApp id: {$clientKey['app_id']},Secret id: {$clientKey['secret_id']},Secret key: {$clientKey['secret_key']}\033[0m" . PHP_EOL;
                 } else {
                     $this->error('Param Error');
                 }

@@ -17,5 +17,6 @@
   "the new password cannot be the same as the old one": "The new password cannot be the same as the old one",
   "unexpected mistakes occur": "Unexpected mistakes occur",
   "the client is not authorized": "The client is not authorized",
-  "the given data was invalid": "The given data was invalid."
+  "the given data was invalid": "The given data was invalid.",
+  "root user cannot be deleted": "Root user cannot be deleted"
 }

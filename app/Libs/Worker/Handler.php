@@ -82,8 +82,9 @@ class Handler
             return true;
         }
         try {
+            $header = app('App\Libs\ApiAuthenticate')->defaultEncrypt();
             $response = app('Dingo\Api\Dispatcher')->version('v1')->header('Authorization', $token)
-                ->header('Client-Key', env('CLIENT_KEY'))->post('lib/ping', ['ping' => 1]);
+                ->header('Client-Key', $header['key'])->header('Secret-Salt', $header['salt'])->post('lib/ping', ['ping' => 1]);
             $response = $response['data'];
             if (is_array($response)) {
                 $explode = explode(' ', $token);

@@ -14,7 +14,7 @@ class ClientAuthenticate extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'token', 'expire_time', 'status'
+        'id', 'app_id', 'secret_id', 'secret_key', 'expire_time', 'status'
     ];
 
     protected $table = 'client_authenticate';
