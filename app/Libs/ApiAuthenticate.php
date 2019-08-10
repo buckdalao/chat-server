@@ -15,7 +15,7 @@ class ApiAuthenticate
     public function param($secretId, $timestamp, $random, $key)
     {
         $this->secretId = $secretId;
-        $this->timestamp = $timestamp;
+        $this->timestamp = (int)$timestamp;
         $this->random = $random;
         $this->key = $key;
         return $this;
@@ -38,6 +38,9 @@ class ApiAuthenticate
     protected function verifyParam()
     {
         if (empty($this->secretId) || empty($this->timestamp) || empty($this->random)) {
+            return false;
+        }
+        if (time() - $this->timestamp > 180 || $this->timestamp - time() > 180) {
             return false;
         }
         if (!app('App\Repositories\Tool\ClientAuthenticateRepository')->authenticate($this->secretId)) {
