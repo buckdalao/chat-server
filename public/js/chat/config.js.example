@@ -1,0 +1,3 @@
+const appId = 10002;
+const secretId = '4a8dc0d4e0574b8ab19a4c8a5d12f945';
+const secretKey = '89e76d87b6f24758b11fea47e286f2c4';

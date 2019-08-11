@@ -17,9 +17,6 @@ http.interceptors.request.use(function (config) {
     t = parseInt(t);
     let r = Math.floor(Math.random()*10000000);
     let key = ''
-    let appId = 10001
-    let secretId = '65f4952526064c6d8c7a79c33f3c188e'
-    let secretKey = 'd762b1a48b7643af800648bb2b75ad82'
     var sr = 'u=' + appId +'&k=' + secretId + '&t=' + t + '&r=' + r + '&f=';
     key = CryptoJS.HmacSHA1(sr, secretKey);
     let salt = t + ';' + r + ';' + secretId
@@ -38,7 +35,7 @@ http.interceptors.response.use(function (response) {
 }, function (error) {
     console.log(error)
     // 对响应错误做点什么
-    /*if (error.response.status === 401 || error.response.data.status_code === 401) {
+    if (error.response.status === 401 || error.response.data.status_code === 401) {
         http.post('/auth/logout').then(() => {
             localStorage.clear()
             location.href = '/auth/login'
@@ -46,6 +43,6 @@ http.interceptors.response.use(function (response) {
     }
     if (error.response.status === 419 || error.response.data.status_code === 419) {
         location.reload()
-    }*/
+    }
     return Promise.reject(error)
 })

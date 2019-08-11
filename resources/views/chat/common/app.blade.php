@@ -30,6 +30,7 @@
 <script type="text/javascript" src="https://unpkg.com/iview/dist/iview.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/crypto-js@3.1.9-1/crypto-js.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
+<script src="/js/chat/config.js?v={{rand(1,99)}}"></script>
 <script src="/js/chat/axios.js?v={{rand(1,99)}}"></script>
 @yield('script')
 </html>
