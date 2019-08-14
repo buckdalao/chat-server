@@ -22,19 +22,23 @@ http.interceptors.request.use(function (config) {
     let salt = t + ';' + r + ';' + secretId
     config.headers.common['Client-Key'] = window.btoa(key + sr)
     config.headers.common['Secret-Salt'] = salt
+    iview.LoadingBar.start()
     return config
 }, function (error) {
     // 对请求错误做些什么
+    iview.LoadingBar.error()
     return Promise.reject(error)
 })
 
 // 添加响应拦截器
 http.interceptors.response.use(function (response) {
     // 对响应数据做点什么
+    iview.LoadingBar.finish()
     return response
 }, function (error) {
     console.log(error)
     // 对响应错误做点什么
+    iview.LoadingBar.error()
     if (error.response.status === 401 || error.response.data.status_code === 401) {
         http.post('/auth/logout').then(() => {
             localStorage.clear()

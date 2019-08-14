@@ -78,13 +78,17 @@ new Vue({
         CKLColumns () {
             let col = [
                 {
-                    title: 'ID',
-                    key: 'id',
+                    title: 'App ID',
+                    key: 'app_id',
                     sortable: true
                 },
                 {
-                    title: 'Token',
-                    key: 'token'
+                    title: 'Secret ID',
+                    key: 'secret_id'
+                },
+                {
+                    title: 'Secret Key',
+                    key: 'secret_key'
                 },
                 {
                     title: 'Expire time',
@@ -475,11 +479,11 @@ new Vue({
             this.getRouteList(page)
         },
         routeListSearch (type) {
-            if (type === 1 && this.this.route.searchValue) {
+            if (type === 1 && this.route.searchValue) {
                 this.getRouteList(1)
             }
-            if (type ===2 && this.this.route.searchValue) {
-                this.this.route.searchValue = ''
+            if (type ===2 && this.route.searchValue) {
+                this.route.searchValue = ''
                 this.getRouteList(1)
             }
         },

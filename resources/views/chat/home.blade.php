@@ -198,7 +198,7 @@
                                     {{--<i-select v-model="searchKey" class="i-search-col">
                                         <i-option :value="111">111</i-option>
                                     </i-select>--}}
-                                    <i-input clearable placeholder="输入Token关键字搜索" class="i-search-input" v-model="client.searchValue" ></i-input>
+                                    <i-input clearable placeholder="输入Secret ID关键字搜索" class="i-search-input" v-model="client.searchValue" ></i-input>
                                     <i-button @click="clientKeyListSearch(1)" class="search-btn" type="primary">搜索</i-button>
                                     <i-button @click="clientKeyListSearch(2)" class="search-btn" type="success">重置</i-button>
                                 </div>
