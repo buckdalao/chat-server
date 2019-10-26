@@ -12,6 +12,7 @@ class ChatGroupMessageController extends Controller
 
     public function __construct(ChatGroupMessageRepository $chatGroupMessageRepository)
     {
+        parent::__construct();
         $this->chatGroupMessageRepository = $chatGroupMessageRepository;
     }
 
@@ -26,7 +27,11 @@ class ChatGroupMessageController extends Controller
         if (empty($groupId) || !is_numeric($limit)) {
             return $this->badRequest(__('parameter error'));
         }
-        $res = $this->chatGroupMessageRepository->getGroupMessage($groupId, $limit ?: 50);
+        $res = $this->chatGroupMessageRepository->getGroupMessage($groupId, $limit ?: 50)->toArray();
+        if ($res['current_page'] != $res['last_page'] && \request()->get('getLast')) {
+            \request()->offsetSet('page', $res['last_page']);
+            $res = $this->chatGroupMessageRepository->getGroupMessage($groupId, $limit ?: 50)->toArray();
+        }
         return $this->successWithData($res);
     }
 }

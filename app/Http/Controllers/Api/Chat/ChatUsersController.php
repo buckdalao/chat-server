@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers\Api\Chat;
 
+use App\Libs\Traits\BaseChatTrait;
+use App\Libs\Traits\WsMessageTrait;
 use App\Repositories\Chat\ChatUsersRepository;
+use GatewayClient\Gateway;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class ChatUsersController extends Controller
 {
+    use WsMessageTrait, BaseChatTrait;
     protected $chatUserRepository;
 
     public function __construct(ChatUsersRepository $chatUsersRepository)
     {
+        parent::__construct();
+        Gateway::$registerAddress = getenv('REGISTER_SERVER');
         $this->chatUserRepository = $chatUsersRepository;
     }
 
@@ -47,5 +53,36 @@ class ChatUsersController extends Controller
         }else {
             return $this->badRequest();
         }
+    }
+
+    /**
+     * 解除好友
+     *
+     * @param Request $request
+     * @param         $chatId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unFriend (Request $request, $chatId)
+    {
+        $uid = $request->user()->id;
+        $fid = $this->chatUserRepository->getFriendIdByChatId($uid, $chatId);
+        if ($fid == 0) {
+            return $this->badRequest(__('parameter error'));
+        }
+        $this->chatUserRepository->unFriend($chatId);
+        // 通知客户端更新好友列表
+        if (Gateway::isUidOnline($fid)) {
+            Gateway::sendToUid($fid, $this->message($request, [
+                'type' => $this->getType('release_friend_list'),
+                'data' => 0
+            ]));
+        }
+        if (Gateway::isUidOnline($uid)) {
+            Gateway::sendToUid($uid, $this->message($request, [
+                'type' => $this->getType('release_friend_list'),
+                'data' => 0
+            ]));
+        }
+        return $this->success();
     }
 }

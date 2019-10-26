@@ -54,7 +54,7 @@ class ChatUsersMessageRepository extends EloquentRepository
      *
      * @param     $chatId
      * @param int $limit
-     * @return array
+     * @return $this|array|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function chatMessage($chatId, $limit = 0)
     {

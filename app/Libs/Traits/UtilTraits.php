@@ -24,37 +24,6 @@ trait UtilTraits
         }
     }
 
-    public function requestIsEmpty(Request $request, array $needParam = [], $operator = null)
-    {
-        $bool = false;
-        $all = $request->all();
-        if (sizeof($all)) {
-            $num = 0;
-            foreach ($needParam as $v) {
-                if (!Arr::exists($all, $v) && (empty($operator) || strtolower($operator) == 'and')) {
-                    return true;
-                } else {
-                    $num++;
-                }
-            }
-            if ($num == 0 && strtolower($operator) == 'or') {
-                return true;
-            }
-            foreach ($all as $key => $val) {
-                if (strtolower($operator) == 'or' && in_array($key, $needParam) && !empty($key)) {
-                    break;
-                }
-                if (in_array($key, $needParam) && empty($val) && (empty($operator) || strtolower($operator) == 'and')) {
-                    $bool = true;
-                    break;
-                }
-            }
-        } else {
-            $bool = true;
-        }
-        return $bool;
-    }
-
     public function getMediaPath($requestPath)
     {
         $requestPath = str_replace('media/audio/', '', $requestPath);

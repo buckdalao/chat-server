@@ -65,6 +65,7 @@ class WorkermanServer extends Command
         $this->startBusinessWorker();
         $this->startRegister();
         // $this->startGlobalData(); 关闭服务19.5.14
+        $this->signalingServer();
         Worker::runAll();
     }
 
@@ -125,5 +126,96 @@ class WorkermanServer extends Command
     private function startGlobalData()
     {
         new Server(getenv('GLOBAL_SERVER'), getenv('GLOBAL_SERVER_PORT'));
+    }
+
+    private function signalingServer()
+    {
+        // 订阅主题和连接的对应关系
+        $subject_connnection_map = array();
+        $sslCrt = getenv('SSL_LOCAL_CRT');
+        $context = [];
+        if ($sslCrt != 'null') {
+            $context = array(
+                'ssl' => array(
+                    'local_cert'  => $sslCrt, // crt文件
+                    'local_pk'    => getenv('SSL_LOCAL_KEY'),
+                    'verify_peer' => false
+                )
+            );
+        }
+        if ($sslCrt != 'null') {
+            // websocket监听8877端口
+            $worker = new Worker('websocket://0.0.0.0:8877', $context);
+            $worker->transport = 'ssl';
+        } else {
+            // websocket监听8877端口
+            $worker = new Worker('websocket://0.0.0.0:8877');
+        }
+        // 进程数只能设置为1，避免多个连接连连到不同进程
+        // 不用担心性能问题，作为Signaling Server，workerman一个进程就足够了
+        $worker->count = 1;
+        // 进程名字
+        $worker->name = 'Signaling Server';
+        // 连接上来时设置个subjects属性，用来保存当前连接
+        $worker->onConnect = function ($connection){
+            $connection->subjects = array();
+        };
+        // 当客户端发来数据时
+        $worker->onMessage = function($connection, $data)
+        {
+            $data = json_decode($data, true);
+            switch ($data['cmd']) {
+                // 订阅主题
+                case 'subscribe':
+                    $subject = $data['subject'];
+                    subscribe($subject, $connection);
+                    break;
+                // 向某个主题发布消息
+                case 'publish':
+                    $subject = $data['subject'];
+                    $event = $data['event'];
+                    $data = $data['data'];
+                    publish($subject, $event, $data, $connection);
+                    break;
+            }
+        };
+        // 客户端连接关闭时把连接从主题映射数组里删除
+        $worker->onClose = function($connection){
+            destry_connection($connection);
+        };
+        // 订阅
+        function subscribe($subject, $connection) {
+            global $subject_connnection_map;
+            $connection->subjects[$subject] = $subject;
+            $subject_connnection_map[$subject][$connection->id] = $connection;
+        }
+        // 取消订阅
+        function unsubscribe($subject, $connection) {
+            global $subject_connnection_map;
+            unset($subject_connnection_map[$subject][$connection->id]);
+        }
+        // 向某个主题发布事件
+        function publish($subject, $event, $data, $exclude) {
+            global $subject_connnection_map;
+            if (empty($subject_connnection_map[$subject])) {
+                return;
+            }
+            foreach ($subject_connnection_map[$subject] as $connection) {
+                if ($exclude == $connection) {
+                    continue;
+                }
+                $connection->send(json_encode(array(
+                    'cmd'   => 'publish',
+                    'event' => $event,
+                    'data'  => $data
+                )));
+            }
+        }
+        // 清理主题映射数组
+        function destry_connection ($connection) {
+            foreach ($connection->subjects as $subject) {
+                unsubscribe($subject, $connection);
+            }
+        }
     }
 }

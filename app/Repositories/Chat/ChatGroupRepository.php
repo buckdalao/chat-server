@@ -99,4 +99,16 @@ class ChatGroupRepository extends EloquentRepository
         }
         return $this->model->newQuery()->paginate($limit ?? 15);
     }
+
+    /**
+     * 修改群名称
+     *
+     * @param $groupId
+     * @param $name
+     * @return int
+     */
+    public function editGroupName($groupId, $name)
+    {
+        return $this->model->newQuery()->whereKey($groupId)->update(['group_name' => $name]);
+    }
 }

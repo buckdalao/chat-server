@@ -75,6 +75,12 @@ class ChatGroupUserRepository extends EloquentRepository
         return $this->model->newQuery()->where('group_id', '=', $groupId)->where('user_id', '=', $uid)->first();
     }
 
+    /**
+     * 获取群用户信息列表
+     *
+     * @param $groupId
+     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection|static[]
+     */
     public function groupUserInfoList($groupId)
     {
         $res = $this->model->newQuery()->from($this->model->alias('gu'))->leftJoin($this->userModel->alias('u'), function($join) {
@@ -90,5 +96,32 @@ class ChatGroupUserRepository extends EloquentRepository
             });
         }
         return $res;
+    }
+
+    /**
+     * 用户退出群
+     *
+     * @param $groupId
+     * @param $uid
+     * @return mixed
+     */
+    public function removeGroupUser($groupId, $uid)
+    {
+        return $this->model->newQuery()->where('group_id', '=', $groupId)->where('user_id', '=', $uid)->delete();
+    }
+
+    /**
+     * 修改群昵称
+     *
+     * @param $groupId
+     * @param $uid
+     * @param $name
+     * @return int
+     */
+    public function editGroupUserName($groupId, $uid, $name)
+    {
+        return $this->model->newQuery()->where('group_id', '=', $groupId)->where('user_id', '=', $uid)->update([
+            'group_user_name' => $name
+        ]);
     }
 }

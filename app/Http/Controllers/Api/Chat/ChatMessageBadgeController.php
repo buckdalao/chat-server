@@ -16,6 +16,7 @@ class ChatMessageBadgeController extends Controller
     public function __construct(ChatMessageBadgeRepository $chatMessageBadgeRepository,
                                 ChatGroupMessageBadgeRepository $groupMessageBadgeRepository)
     {
+        parent::__construct();
         $this->chatMessageBadgeRepository = $chatMessageBadgeRepository;
         $this->groupMessageBadgeRepository = $groupMessageBadgeRepository;
     }
@@ -26,12 +27,12 @@ class ChatMessageBadgeController extends Controller
      */
     public function resetBadge(Request $request)
     {
-        if (empty($request->user()->id) || $this->requestIsEmpty($request, ['id'])) {
+        $id = $request->get('id');
+        if (empty($request->user()->id) || empty($id)) {
             return $this->badRequest();
         }
         $uid = $request->user()->id;
         $isGroup = $request->get('is_group');
-        $id = $request->get('id');
         if ($isGroup && $isGroup != 'false') {
             $this->groupMessageBadgeRepository->resetBadge($uid, $id);
         } else {

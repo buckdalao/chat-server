@@ -33,4 +33,5 @@
 <script src="/js/chat/config.js?v={{rand(1,99)}}"></script>
 <script src="/js/chat/axios.js?v={{rand(1,99)}}"></script>
 @yield('script')
+<script src="/js/chat/index.js?v={{rand(1,9999)}}"></script>
 </html>

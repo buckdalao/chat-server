@@ -70,7 +70,7 @@ class RegisterController extends Controller
             'photo'     => 'storage/photos/photo.jpg' // default photo
         ]);
         User::query()->whereKey($user->id)->update(['chat_number' => 1000000 + $user->id]);
-        if ($data['join_group'] == true || $data['join_group'] == 'true') {
+        if ($data['join_group'] === true || $data['join_group'] === 'true') {
             app('App\Repositories\Chat\ChatGroupUserRepository')->joinGroup($user, 1);
         }
         return $user;

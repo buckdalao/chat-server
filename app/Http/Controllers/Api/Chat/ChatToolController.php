@@ -22,6 +22,7 @@ class ChatToolController extends Controller
                                 UserRepository $userRepository,
                                 ChatUsersRepository $chatUsersRepository)
     {
+        parent::__construct();
         $this->chatGroupUserRepository = $chatGroupUserRepository;
         $this->userRepository = $userRepository;
         $this->chatUsersRepository = $chatUsersRepository;

@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Api\Chat;
 
+use App\Libs\Traits\BaseChatTrait;
+use App\Libs\Traits\WsMessageTrait;
 use App\Repositories\Chat\ChatGroupRepository;
 use App\Repositories\Chat\ChatGroupUserRepository;
+use GatewayClient\Gateway;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class ChatGroupController extends Controller
 {
+    use WsMessageTrait, BaseChatTrait;
     protected $chatGroupRepository;
     protected $chatGroupUserRepository;
 
@@ -17,6 +22,7 @@ class ChatGroupController extends Controller
         parent::__construct();
         $this->chatGroupRepository = $chatGroupRepository;
         $this->chatGroupUserRepository = $chatGroupUserRepository;
+        Gateway::$registerAddress = getenv('REGISTER_SERVER');
     }
 
     /**
@@ -32,6 +38,7 @@ class ChatGroupController extends Controller
         }
         $members = $this->chatGroupUserRepository->groupUserInfoList($groupId)->toArray();
         $groupInfo = $this->chatGroupRepository->getGroupByGroupId($groupId)->toArray();
+        $currentUser = $this->chatGroupUserRepository->getGroupUserInfo($groupId, \request()->user()->id);
         if ($groupInfo['photo']) {
             $groupInfo['photo'] = asset($groupInfo['photo']);
         }
@@ -42,6 +49,7 @@ class ChatGroupController extends Controller
             }
         }
         $groupInfo['group_members'] = $members;
+        $groupInfo['current_user'] = $currentUser;
         return $this->successWithData($groupInfo);
     }
 
@@ -69,5 +77,88 @@ class ChatGroupController extends Controller
     public function getAllGroupList(Request $request)
     {
         return $this->successWithData($this->chatGroupRepository->allGroup($request->get('keyword')));
+    }
+
+    /**
+     * 获取群里某个用户信息
+     *
+     * @param $groupId
+     * @param $uid
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getGroupUserInfo($groupId, $uid)
+    {
+        $groupUser = $this->chatGroupUserRepository->getGroupUserInfo($groupId, $uid);
+        return $this->successWithData($groupUser);
+    }
+
+    /**
+     * 退出群
+     *
+     * @param $request
+     * @param $groupId
+     * @param $uid
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function quitTheGroup(Request $request, $groupId, $uid)
+    {
+        $owner = $this->chatGroupRepository->getGroupOwnerUid($groupId);
+        if ($owner == $uid) {
+            return $this->fail('Unauthorized', 401);
+        }
+        $this->chatGroupUserRepository->removeGroupUser($groupId, $uid);
+        if (Gateway::isUidOnline($uid)) {
+            Gateway::sendToUid($uid, $this->message($request, [
+                'type' => $this->getType('release_friend_list'),
+                'data' => 1
+            ]));
+        }
+        return $this->success();
+    }
+
+    /**
+     * 修改群昵称
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function editGroupUserName(Request $request)
+    {
+        Validator::make($request->all(), [
+            'group_id' => 'required|integer',
+            'name' => 'required|string'
+        ])->validate();
+        $groupId = $request->get('group_id');
+        $name = $request->get('name');
+        $uid = $request->user()->id;
+        $this->chatGroupUserRepository->editGroupUserName($groupId, $uid, $name);
+        return $this->success();
+    }
+
+    /**
+     * 修改群名称
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function editGroupName(Request $request)
+    {
+        Validator::make($request->all(), [
+            'group_id' => 'required|integer',
+            'name' => 'required|string'
+        ])->validate();
+        $groupId = $request->get('group_id');
+        $name = $request->get('name');
+        $uid = $request->user()->id;
+        $owner = $this->chatGroupRepository->getGroupOwnerUid($groupId);
+        if ($uid != $owner) {
+            return $this->fail('Unauthorized', 401);
+        }
+        $this->chatGroupRepository->editGroupName($groupId, $name);
+        Gateway::sendToGroup($groupId, $this->message($request, [
+            'type' => $this->getType('release_friend_list'),
+            'data' => 1
+        ]));
+        return $this->success();
     }
 }

@@ -13,6 +13,7 @@ class IndexController extends Controller
     {
         return response()->view('chat.home', [
             'title' => 'Home',
+            'pageName' => 'chat',
             'user' => \request()->user(),
             'isRoot' => \request()->user()->hasRole('root')
         ]);

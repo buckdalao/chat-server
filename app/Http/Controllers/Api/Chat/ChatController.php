@@ -64,6 +64,7 @@ class ChatController extends Controller
         $this->chatGroupUserRepository = $chatGroupUserRepository;
         $this->chatApplyRepository = $chatApplyRepository;
         $this->userNotifyBadgeRepository = $userNotifyBadgeRepository;
+        parent::__construct();
     }
 
     /**
@@ -81,6 +82,8 @@ class ChatController extends Controller
         $chatId = $request->get('chat_id');
         $content = $request->get('content');
         $base64Img = $request->get('base64_img');
+        $videoCall = $request->get('video_call');
+        $answerStatus = $request->get('answer_status');
         $uid = $request->user()->id;
         $fid = $this->chatUsersRepository->getFriendIdByChatId($uid, $chatId);
         if ($fid) {
@@ -113,23 +116,48 @@ class ChatController extends Controller
                     return $this->success();
                 }
             }
-            $sendUser = $base64Img ? [$fid, $uid] : $fid;
-            Gateway::sendToUid($sendUser, $this->message($request, [
-                'type'    => $this->getType('message'),
-                'data'    => $content,
-                'chat_id' => $chatId
-            ]));
-            if (!Gateway::isUidOnline($fid)) { // 好友不在线做提醒
-                $this->chatMessageBadgeRepository->upBadge($fid, $chatId);
+            if ($videoCall == 1) {
+                $content .= Gateway::isUidOnline($fid) ? '' : ' failed';
             }
-            // 消息缓存
-            $this->setChatId($chatId)->setMessage([
-                'type'      => $this->getType('message'),
-                'data'      => $content,
-                'uid'       => $uid,
-                'user_name' => $request->user()->name,
-                'photo'     => asset($request->user()->photo),
-            ])->saveRedis();
+            $sendUser = $base64Img ? [$fid, $uid] : $fid;
+            if ($videoCall != 2) { // 视频通话应当不走message通道
+                Gateway::sendToUid($sendUser, $this->message($request, [
+                    'type'    => $this->getType('message'),
+                    'data'    => $content,
+                    'chat_id' => $chatId
+                ]));
+                if (!Gateway::isUidOnline($fid)) { // 好友不在线做提醒
+                    $this->chatMessageBadgeRepository->upBadge($fid, $chatId);
+                }
+                // 消息缓存
+                $this->setChatId($chatId)->setMessage([
+                    'type'      => $this->getType('message'),
+                    'data'      => $content,
+                    'uid'       => $uid,
+                    'user_name' => $request->user()->name,
+                    'photo'     => asset($request->user()->photo),
+                ])->saveRedis();
+            }
+            if ($videoCall == 1) { // 视频通话请求
+                if (!Gateway::isUidOnline($fid)) {
+                    return $this->successWithData(['status' => 'failed', 'message' => '好友不在线']);
+                }
+                Gateway::sendToUid($fid, $this->message($request, [
+                    'type'    => $this->getType('video_call'),
+                    'data'    => $content,
+                    'chat_id' => $chatId
+                ]));
+            }
+            if ($videoCall == 2) { // 视频通话应当结果
+                if (!Gateway::isUidOnline($fid)) {
+                    return $this->successWithData(['status' => 'failed', 'message' => '好友不在线']);
+                }
+                Gateway::sendToUid($fid, $this->message($request, [
+                    'type'    => $this->getType('video_answer'),
+                    'data'    => $answerStatus,
+                    'chat_id' => $chatId
+                ]));
+            }
         }
         return $this->success();
     }
@@ -221,11 +249,11 @@ class ChatController extends Controller
      */
     public function init(Request $request)
     {
-        if ($this->requestIsEmpty($request, ['connect_id']) || empty($request->user()->id)) {
+        $connectId = $request->get('connect_id');
+        if (empty($connectId) || empty($request->user()->id)) {
             return $this->badRequest();
         }
         $uid = $request->user()->id;
-        $connectId = $request->get('connect_id');
         if (Gateway::isUidOnline($uid)) {
             return $this->fail(__('the account has been logged in elsewhere'));
         }

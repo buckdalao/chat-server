@@ -31,7 +31,10 @@ class UserRepository extends EloquentRepository
     public function friendsList($userId)
     {
         return $this->chatUserModel->newQuery()
-            ->where('user_id_1', '=', (int)$userId)->orWhere('user_id_2', '=', (int)$userId)->get();
+            ->where('status', '!=', 1)
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id_1', '=', (int)$userId)->orWhere('user_id_2', '=', (int)$userId);
+            })->get();
     }
 
     /**

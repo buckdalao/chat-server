@@ -82,15 +82,27 @@ class ChatApplyRepository extends EloquentRepository
         $users = $this->model->newQuery()->from($this->model->alias('ca'))
             ->leftJoin($this->user->alias('u'), 'ca.apply_user_id', '=', 'u.id')
             ->leftJoin($this->group->alias('g'), 'ca.group_id', '=', 'g.group_id')
-            ->where('ca.friend_id', '=', $uid)->orWhere('g.user_id', '=', $uid)
-            ->orderBy('ca.id', 'asc')
+            ->where(function ($query) use ($uid) {
+                $query->where('ca.friend_id', '=', $uid)->where('ca.group_id', '=', 0);
+            })->orWhere(function ($query) use ($uid) {
+                $query->where('g.user_id', '=', $uid)->where('ca.friend_id', '=', 0);
+            })->orWhere(function ($query) use ($uid) {
+                $query->where('ca.apply_user_id', '=', $uid)->where('ca.friend_id', '>', 0)->where('ca.group_id', '>', 0);
+            })->orderBy('ca.id', 'asc')
             ->get([
-                'u.id as uid', 'u.name as user_name', 'ca.apply_time', 'ca.remarks', 'u.photo', 'u.chat_number', 'ca.group_id', 'ca.id', 'ca.apply_status'
+                'u.id as uid', 'u.name as user_name', 'ca.apply_time', 'ca.remarks', 'u.photo', 'u.chat_number', 'ca.group_id', 'ca.id', 'ca.apply_status',
+                'g.group_name', 'g.group_number', 'g.photo as group_photo', 'ca.friend_id'
                 ]);
         if ($users) {
             collect($users)->map(function ($item) {
                 if ($item->photo) {
                     $item->photo = asset($item->photo);
+                }
+                if ($item->group_photo) {
+                    $item->group_photo = asset($item->group_photo);
+                }
+                if ($item->friend_id && $item->group_id > 0) {
+                    $item->inviter = $this->user->newQuery()->find($item->friend_id, ['name'])->name;
                 }
             });
         }

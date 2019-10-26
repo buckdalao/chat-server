@@ -23,12 +23,17 @@ class ChatUsersRepository extends EloquentRepository
     public function becomeFriends($uid, $fid)
     {
         $bool = false;
-        if ($uid && $fid && !$this->isFriends($uid, $fid)) {
+        if ($uid && $fid && !$this->isFriends($uid, $fid, false)) {
             $bool = $this->model->newQuery()->insert([
                 'user_id_1' => $uid < $fid ? $uid : $fid,
                 'user_id_2' => $uid > $fid ? $uid : $fid,
                 'status'    => 0,
             ]);
+        }
+        $chat = $this->getChat($uid, $fid, false);
+        if ($chat) {
+            $this->model->newQuery()->whereKey($chat->id)->update(['status' => 0]);
+            $bool = true;
         }
         return $bool;
     }
@@ -40,12 +45,20 @@ class ChatUsersRepository extends EloquentRepository
      * @param $fid
      * @return bool
      */
-    public function isFriends($uid, $fid)
+    public function isFriends($uid, $fid, $status = true)
     {
         if ($uid < $fid) {
-            return $this->model->newQuery()->where('user_id_1', '=', $uid)->where('user_id_2', '=', $fid)->exists();
+            if ($status) {
+                return $this->model->newQuery()->where('status', '!=', 1)->where('user_id_1', '=', $uid)->where('user_id_2', '=', $fid)->exists();
+            } else {
+                return $this->model->newQuery()->where('user_id_1', '=', $uid)->where('user_id_2', '=', $fid)->exists();
+            }
         } else {
-            return $this->model->newQuery()->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->exists();
+            if ($status) {
+                return $this->model->newQuery()->where('status', '!=', 1)->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->exists();
+            } else {
+                return $this->model->newQuery()->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->exists();
+            }
         }
     }
 
@@ -56,12 +69,20 @@ class ChatUsersRepository extends EloquentRepository
      * @param $fid
      * @return \Illuminate\Database\Eloquent\Model|null|object|static
      */
-    public function getChat($uid, $fid)
+    public function getChat($uid, $fid, $status = true)
     {
         if ($uid < $fid) {
-            return $this->model->newQuery()->where('user_id_1', '=', $uid)->where('user_id_2', '=', $fid)->first();
+            if ($status) {
+                return $this->model->newQuery()->where('status', '!=', 1)->where('user_id_1', '=', $uid)->where('user_id_2', '=', $fid)->first();
+            } else {
+                return $this->model->newQuery()->where('user_id_1', '=', $uid)->where('user_id_2', '=', $fid)->first();
+            }
         } else {
-            return $this->model->newQuery()->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->first();
+            if ($status) {
+                return $this->model->newQuery()->where('status', '!=', 1)->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->first();
+            } else {
+                return $this->model->newQuery()->where('user_id_1', '=', $fid)->where('user_id_2', '=', $uid)->first();
+            }
         }
     }
 
@@ -82,5 +103,17 @@ class ChatUsersRepository extends EloquentRepository
             }
         }
         return $friendId;
+    }
+
+    /**
+     * 解除好友
+     *
+     * @param $chatId
+     */
+    public function unFriend($chatId)
+    {
+        if ($chatId) {
+            $this->model->newQuery()->whereKey($chatId)->update(['status' => 1]);
+        }
     }
 }

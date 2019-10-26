@@ -11,26 +11,40 @@ class ApiAuthenticate
     protected $timestamp;
     protected $random;
     protected $key;
+    protected $appId;
 
-    public function param($secretId, $timestamp, $random, $key)
+    public function param($secretId, $timestamp, $random, $key, $appId)
     {
         $this->secretId = $secretId;
         $this->timestamp = (int)$timestamp;
         $this->random = $random;
         $this->key = $key;
+        $this->appId = $appId;
         return $this;
     }
 
     public function setRequest(Request $request)
     {
         $key = $request->header('client-key');
-        $salt = $request->header('secret-salt');
-        if ($salt && $key) {
-            $data = explode(';', $salt);
-            $timestamp = $data[0];
-            $random = $data[1];
-            $secretId = $data[2];
-            $this->param($secretId, $timestamp, $random, $key);
+        $originStr = strstr(base64_decode($key), 'u');
+        $arr = explode('&', $originStr);
+        if (sizeof($arr)) {
+            foreach ($arr as $v) {
+                $d = explode('=', $v);
+                if ($d[0] == 'u') {
+                    $this->appId = $d[1];
+                }
+                if ($d[0] == 'k') {
+                    $this->secretId = $d[1];
+                }
+                if ($d[0] == 'r') {
+                    $this->random = $d[1];
+                }
+                if ($d[0] == 't') {
+                    $this->timestamp = $d[1];
+                }
+            }
+            $this->key = $key;
         }
         return $this;
     }
@@ -72,9 +86,6 @@ class ApiAuthenticate
         $r = mt_rand(10000000, 99999999);
         $original = 'u=' . $u . '&k=' . $k . '&t=' . $t . '&r=' . $r . '&f=';
         $signStr = base64_encode(hash_hmac('sha1', $original, env('SECRET_KEY')) . $original);
-        return [
-            'key'  => $signStr,
-            'salt' => $t . ';' . $r . ';' . $k
-        ];
+        return $signStr;
     }
 }

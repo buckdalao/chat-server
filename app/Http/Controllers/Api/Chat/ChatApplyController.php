@@ -14,6 +14,7 @@ use App\Repositories\Chat\UserRepository;
 use GatewayClient\Gateway;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class ChatApplyController extends Controller
 {
@@ -39,6 +40,7 @@ class ChatApplyController extends Controller
         $this->chatGroupRepository = $chatGroupRepository;
         $this->userNotifyBadgeRepository = $userNotifyBadgeRepository;
         $this->userRepository = $userRepository;
+        parent::__construct();
     }
 
     /**
@@ -58,10 +60,10 @@ class ChatApplyController extends Controller
 
     public function addFriends(Request $request)
     {
-        if (empty($request->user()->id) || $this->requestIsEmpty($request, ['friend_id', 'group_id'], 'or')){
+        $id = $request->get('friend_id') ?: $request->get('group_id');
+        if (empty($request->user()->id) || empty($id)){
             return $this->badRequest(__('parameter error'));
         }
-        $id = $request->get('friend_id') ?: $request->get('group_id');
         $isGroup = $request->get('group_id') ? true : false;
         if (!$isGroup && $this->chatUsersRepository->isFriends($request->user()->id, $id)) {
             return $this->fail(__('is already a friendship'));
@@ -72,11 +74,15 @@ class ChatApplyController extends Controller
         if ($this->chatApplyRepository->verify($id, $isGroup, $request->user()->id)) {
             return $this->fail(__('application has been sent'));
         }
+        $remark = $request->get('remarks');
+        if (empty($remark)) {
+            $remark = $isGroup ? '申请加入群' : '申请添加好友';
+        }
         $this->chatApplyRepository->createApply([
             'apply_user_id' => $request->user()->id,
             'friend_id'     => $request->get('friend_id'),
             'group_id'      => $request->get('group_id'),
-            'remarks'       => $request->get('remarks'),
+            'remarks'       => $remark,
         ]);
         if ($isGroup) {
             $uid = $this->chatGroupRepository->getGroupOwnerUid($request->get('group_id'));
@@ -112,7 +118,7 @@ class ChatApplyController extends Controller
      */
     public function audit(Request $request, $applyId)
     {
-        if (empty($request->user()->id) || empty($applyId) || $this->requestIsEmpty($request, ['audit'])){
+        if (empty($request->user()->id) || empty($applyId) || $request->is('audit')){
             return $this->badRequest(__('parameter error'));
         }
         if ($this->chatApplyRepository->hasBeenAudit($applyId)) {
@@ -120,6 +126,7 @@ class ChatApplyController extends Controller
         }
         $this->chatApplyRepository->auditApply($applyId, $request->get('audit'));
         $applyInfo = $this->chatApplyRepository->getApplyInfoById($applyId);
+        $friendsList = [];
         if ($applyInfo && $request->get('audit') == 1) { // 同意申请
             if ($applyInfo->group_id) {
                 $user = User::find($applyInfo->apply_user_id);
@@ -157,5 +164,43 @@ class ChatApplyController extends Controller
         $uid = $request->user()->id;
         $this->userNotifyBadgeRepository->resetBadge($uid, 0);
         return $this->success();
+    }
+
+    /**
+     *  拉人进群
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function inviteToGroup(Request $request)
+    {
+        Validator::make($request->all(), [
+            'users' => 'required',
+            'group_id' => 'required|integer'
+        ])->validate();
+        $users = $request->get('users');
+        $groupId = $request->get('group_id');
+        if (is_array($users)) {
+            foreach ($users as $uid) {
+                if ($this->chatGroupUserRepository->isInGroup($uid, $groupId) || $this->chatApplyRepository->verify($groupId, true, $uid)){
+                    break;
+                }
+                $this->chatApplyRepository->createApply([
+                    'apply_user_id' => $uid,
+                    'friend_id'     => $request->user()->id,
+                    'group_id'      => $groupId,
+                    'remarks'       => $request->get('remarks') ?: '邀请加入该群',
+                ]);
+                if (Gateway::isUidOnline($uid)) {
+                    Gateway::sendToUid($uid, $this->message($request, [
+                        'type' => $this->getType('apply_notify'),
+                        'data' => $request->get('remarks') ?: '邀请加入该群'
+                    ]));
+                } else {
+                    $this->userNotifyBadgeRepository->setBadge($uid);
+                }
+            }
+        }
+        return $this->success(__('application sent'));
     }
 }

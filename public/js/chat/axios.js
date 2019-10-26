@@ -19,9 +19,7 @@ http.interceptors.request.use(function (config) {
     let key = ''
     var sr = 'u=' + appId +'&k=' + secretId + '&t=' + t + '&r=' + r + '&f=';
     key = CryptoJS.HmacSHA1(sr, secretKey);
-    let salt = t + ';' + r + ';' + secretId
     config.headers.common['Client-Key'] = window.btoa(key + sr)
-    config.headers.common['Secret-Salt'] = salt
     iview.LoadingBar.start()
     return config
 }, function (error) {

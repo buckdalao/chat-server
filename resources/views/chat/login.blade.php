@@ -22,12 +22,12 @@
                     <div class="card-body">
                         <i-form ref="formInline" :model="formInline" :rules="ruleInline">
                             <form-item prop="mail">
-                                <i-input v-model="formInline.mail" placeholder="请输入邮箱" size="large">
+                                <i-input v-model="formInline.mail" @keydown.native.enter.prevent ="handleSubmit('formInline')" placeholder="请输入邮箱" size="large">
                                     <Icon type="md-mail" slot="prefix" style="font-size: 18px;"></Icon>
                                 </i-input>
                             </form-item>
                             <form-item prop="password">
-                                <i-input v-bind:type="passwordType" v-model="formInline.password" placeholder="请输入密码"
+                                <i-input v-bind:type="passwordType" @keydown.native.enter.prevent ="handleSubmit('formInline')" v-model="formInline.password" placeholder="请输入密码"
                                          size="large">
                                     <Icon type="md-lock" slot="prefix" style="font-size: 18px;"></Icon>
                                     <Icon v-if="!formInline.is_eye" type="ios-eye-off-outline" slot="suffix"
@@ -84,6 +84,9 @@
         },
         methods: {
             handleSubmit (name) {
+                if (this.loading) {
+                    return false;
+                }
                 this.$refs[name].validate((valid) => {
                     if (valid) {
                         this.loading = true;

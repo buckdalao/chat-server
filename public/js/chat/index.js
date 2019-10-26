@@ -3,6 +3,8 @@ new Vue({
     data: {
         userId: parseInt(document.getElementById('user_id').value),
         tabPage: localStorage.getItem('tab_page') ? localStorage.getItem('tab_page') : 'userList',
+        isCollapsed: false,
+        pageName: pageName,
         user: {
             searchValue: '',
             listLoading: true,
@@ -298,6 +300,21 @@ new Vue({
                     {required: true, message: '请选择guard name', trigger: 'blur'},
                 ]
             }
+        },
+        rotateIcon () {
+            return [
+                'menu-icon',
+                this.isCollapsed ? 'rotate-icon' : ''
+            ];
+        },
+        menuitemClasses () {
+            return [
+                'menu-item',
+                this.isCollapsed ? 'collapsed-menu' : ''
+            ]
+        },
+        sideWidth () {
+            return (this.isCollapsed ? 78 : 200)
         }
     },
     methods: {
@@ -681,8 +698,13 @@ new Vue({
                 this.permission.delModal.loading = false
                 this.permission.delModal.show = false
             })
+        },
+        collapsedSider () {
+            this.$refs.side.toggleCollapse();
+        },
+        selectMenu (name) {
+            location.href = '/' + name
         }
-
     },
     created () {
         this.setContent(this.tabPage)

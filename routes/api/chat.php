@@ -56,6 +56,8 @@ $api->version(['v1'], [
             ->name('.getChatMessageByUid'); // 获取登录用户对应好友的消息 参数 friend_id
         $api->get('user/info/{uid}', 'UserController@getUserInfo')->name('.getUserInfo'); // 获取用户信息
         $api->post('friend/add', 'ChatApplyController@addFriends')->name('.addFriends'); // 添加群或好友 param: friend_id | group_id & remarks
+        $api->post('group/invite', 'ChatApplyController@inviteToGroup')->name('.inviteToGroup'); // 加入群
+        $api->delete('friend/{chat_id}/remove', 'ChatUsersController@unFriend')->name('.unFriend'); // 移除好友
         $api->post('number/search', 'ChatToolController@searchNo')->name('.searchNo'); // 搜索好友和群 param: chat_number
         $api->post('apply/audit/{apply_id}', 'ChatApplyController@audit')->name('.applyFriendAudit'); // 加群加好友审核 param: audit
         $api->get('apply/get', 'ChatApplyController@getApplyList')->name('.getApplyList'); // 获取好友和群申请列表 无参数
@@ -66,7 +68,10 @@ $api->version(['v1'], [
         $api->post('message/group/send', 'ChatController@onGroupMessage')->name('.groupMessage'); // 群消息接口 param: group_id & content
         $api->get('connect/close', 'ChatController@onConnectClose')->name('.connectClose'); // websocket断开接口
         $api->post('reset/badge', 'ChatMessageBadgeController@resetBadge')->name('.resetBadge'); // 重置消息提醒 param:chat_id or group id & is_group
-
+        $api->get('group/{group_id}/uid/{uid}/info', 'ChatGroupController@getGroupUserInfo')->name('.getGroupUserInfo'); // 获取群里某个人的信息
+        $api->delete('group/{group_id}/uid/{uid}/quit', 'ChatGroupController@quitTheGroup')->name('.quitTheGroup'); // 退出群
+        $api->post('group/username/edit', 'ChatGroupController@editGroupUserName')->name('.editGroupUserName'); // 修改群昵称 param: group_id & name
+        $api->post('group/name/edit', 'ChatGroupController@editGroupName')->name('.editGroupName'); // 修改群名称 param: group_id & name
     });
     $api->group([
         'prefix' => 'media',

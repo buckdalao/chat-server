@@ -16,6 +16,7 @@ class ChatUsersMessageController extends Controller
     public function __construct(ChatUsersMessageRepository $chatUsersMessageRepository,
                                     ChatUsersRepository $chatUsersRepository)
     {
+        parent::__construct();
         $this->chatUsersMessRepository = $chatUsersMessageRepository;
         $this->chatUsersRepository = $chatUsersRepository;
     }
@@ -33,7 +34,11 @@ class ChatUsersMessageController extends Controller
         }
         $mesList= [];
         if($chatId){
-            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50);
+            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50)->toArray();
+            if ($mesList['current_page'] != $mesList['last_page'] && $request->get('getLast')) {
+                $request->offsetSet('page', $mesList['last_page']);
+                $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50)->toArray();
+            }
         }
         return $this->successWithData($mesList);
     }
@@ -57,7 +62,11 @@ class ChatUsersMessageController extends Controller
         }
         $mesList= [];
         if($chatId){
-            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50);
+            $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50)->toArray();
+            if ($mesList['current_page'] != $mesList['last_page'] && $request->get('getLast')) {
+                $request->offsetSet('page', $mesList['last_page']);
+                $mesList = $this->chatUsersMessRepository->chatMessage((int)$chatId, $limit ?: 50)->toArray();
+            }
         }
         return $this->successWithData($mesList);
     }
