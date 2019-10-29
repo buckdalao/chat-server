@@ -177,6 +177,9 @@ class WorkermanServer extends Command
                     $data = $data['data'];
                     publish($subject, $event, $data, $connection);
                     break;
+                case 'ping':
+                    $connection->send(json_encode(['cmd' => 'ping', 'data' => 2]));
+                    break;
             }
         };
         // 客户端连接关闭时把连接从主题映射数组里删除

@@ -97,7 +97,7 @@
                 callButton.addEventListener('click', call, false);
             }
 
-            var signaling = new WebSocket('ws://192.168.10.10:8877')
+            var signaling = new WebSocket('wss://chat.misterpan.cn:8877')
             signaling.onopen = onopensocket
             signaling.onmessage = onmessage
             signaling.onerror = socketError
@@ -109,10 +109,15 @@
 
             function connectPeers() {
                 // Create the local connection and its event listeners
-
-                localConnection = new RTCPeerConnection();
+                let conf = {iceServers: [
+                    {urls: 'turn:misterpan.cn', username: 'buck', credential: 'panwei123'}
+                ]};
+                localConnection = new RTCPeerConnection(conf);
                 localConnection.ontrack = (e) => {
                     console.log(e)
+                }
+                localConnection.oniceconnectionstatechange = (e) => {
+                    console.log(localConnection.iceConnectionState)
                 }
 
                 // Create the data channel and establish its event listeners
@@ -137,7 +142,7 @@
                     || remoteConnection.addIceCandidate(e.candidate)
                         .catch(handleAddCandidateError);*/
                 localConnection.onicecandidate = function(e) {
-                    console.log(e)
+                    console.log(localConnection)
                     if (!e.candidate) {
                         return handleAddCandidateError()
                     }
@@ -176,6 +181,7 @@
             }
 
             function call(){
+                console.log('offer')
                 localConnection.createOffer()
                     .then(offer => localConnection.setLocalDescription(offer))
                     .then(() => {
@@ -187,6 +193,7 @@
                             data: localConnection.localDescription
                         }))
                     }).catch(handleCreateDescriptionError);
+                console.log(localConnection)
             }
             function answer(localDescription){
                 localConnection.setRemoteDescription(localDescription)
@@ -201,6 +208,7 @@
                             data: localConnection.localDescription
                         }))
                     }).catch(handleCreateDescriptionError);
+                console.log(localConnection)
             }
 
             function onopensocket(){
