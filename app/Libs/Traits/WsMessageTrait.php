@@ -35,7 +35,8 @@ trait WsMessageTrait
         8 => 'apply_notify',
         9 => 'release_friend_list',
         10 => 'video_call',
-        11 => 'video_answer'
+        11 => 'video_answer',
+        12 => 'video_close'
     ];
 
     public function setChatId($chatId)

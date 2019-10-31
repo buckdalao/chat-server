@@ -120,7 +120,7 @@ class ChatController extends Controller
                 $content .= Gateway::isUidOnline($fid) ? '' : ' failed';
             }
             $sendUser = $base64Img ? [$fid, $uid] : $fid;
-            if ($videoCall != 2) { // 视频通话应当不走message通道
+            if (!in_array($videoCall, [2, 3])) { // 视频通话应当不走message通道
                 Gateway::sendToUid($sendUser, $this->message($request, [
                     'type'    => $this->getType('message'),
                     'data'    => $content,
@@ -157,6 +157,15 @@ class ChatController extends Controller
                     'data'    => $answerStatus,
                     'chat_id' => $chatId
                 ]));
+            }
+            if ($videoCall == 3) { // 有一方挂断消息
+                if (Gateway::isUidOnline($fid)) {
+                    Gateway::sendToUid($fid, $this->message($request, [
+                        'type'    => $this->getType('video_close'),
+                        'data'    => 'close',
+                        'chat_id' => $chatId
+                    ]));
+                }
             }
         }
         return $this->success();
